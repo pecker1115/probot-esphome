@@ -9,7 +9,7 @@ const NAME = "IssueLinks";
 export const initIssueLinks = (app: Application) => {
   app.on(
     ["issues.labeled"],
-    filterEventByRepo(NAME, [REPO_ISSUES, REPO_FEATURE_REQUESTS], runIssueLinks)
+    filterEventByRepo(NAME, [REPO_ISSUES], runIssueLinks)
   );
 };
 
@@ -22,10 +22,16 @@ export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
 
   const integrationName = labelName.split("integration: ")[1];
   const codeLink = `https://github.com/esphome/esphome/tree/dev/esphome/components/${integrationName}`;
-  const filter = encodeURIComponent(`is:pr label:${labelName}`);
-  const prsLink = `https://github.com/esphome/esphome/pulls?q=${filter}`;
+  const filterPRs = encodeURIComponent(`is:pr label:"${labelName}"`);
+  const filterIssues = encodeURIComponent(`is:issue label:"${labelName}"`);
+  const prsLink = `https://github.com/esphome/esphome/pulls?q=${filterPRs}`;
+  const issuesLink = `https://github.com/esphome/issues/issues?q=${filterIssues}`;
 
-  const commentBody = `[${integrationName} source](${codeLink})\n[${integrationName} recent changes](${prsLink})`;
+  const commentBody = [
+    `[${integrationName} source](${codeLink})`,
+    `[${integrationName} issues](${issuesLink})`,
+    `[${integrationName} recent changes](${prsLink})`,
+  ].join("\n");
 
   context.log(NAME, `Adding comment with links ${commentBody}`);
   scheduleComment(context, "IssueLinks", commentBody);

@@ -1,8 +1,15 @@
 import { PullsListFilesResponseItem } from "@octokit/rest";
+import { entityComponents, coreComponents } from "../const";
 
 export class ParsedDocsPath {
   public file: PullsListFilesResponseItem;
-  public type: "integration" | null = null;
+  public type:
+    | "integration"
+    | "core"
+    | "cookbook"
+    | "devices"
+    | "guides"
+    | null = null;
   public component: null | string = null;
   public platform: null | string = null;
 
@@ -12,24 +19,39 @@ export class ParsedDocsPath {
     if (parts.length === 0) {
       return;
     }
-    if (parts.shift() !== "source" || parts.shift() !== "_components") {
+
+    const subfolder = parts.shift();
+    if (subfolder === "cookbook") {
+      this.type = "cookbook";
+      return;
+    } else if (subfolder === "devices") {
+      this.type = "devices";
+      return;
+    } else if (subfolder === "guides") {
+      this.type = "guides";
+      return;
+    } else if (subfolder !== "components") {
+      this.type = "core";
       return;
     }
 
     this.type = "integration";
 
-    let integration = parts.shift();
-    if (integration.endsWith(".markdown")) {
-      integration = integration.substring(0, integration.lastIndexOf("."));
-    }
+    const comp = parts.shift().replace(".rst", "");
 
-    if (!integration.includes(".")) {
-      this.component = integration;
+    if (parts.length !== 0) {
+      const platform = parts.shift().replace(".rst", "");
+
+      if (entityComponents.includes(comp)) {
+        this.platform = comp;
+        this.component = platform;
+        return;
+      }
+
+      this.component = comp;
       return;
     }
 
-    const [platform, component] = integration.split(".");
-    this.component = component;
-    this.platform = platform;
+    this.component = comp;
   }
 }

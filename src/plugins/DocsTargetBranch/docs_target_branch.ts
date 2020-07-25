@@ -3,12 +3,7 @@ import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
 import { PRContext } from "../../types";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { filterEventNoBot } from "../../util/filter_event_no_bot";
-import {
-  REPO_BRANDS,
-  REPO_DEV_DOCUMENTATION,
-  REPO_HOME_ASSISTANT_IO,
-  ORG_HASS,
-} from "../../const";
+import { REPO_DOCS, ORG_ESPHOME } from "../../const";
 import {
   extractIssuesOrPullRequestMarkdownLinks,
   extractPullRequestURLLinks,
@@ -17,7 +12,6 @@ import { getIssueFromPayload } from "../../util/issue";
 import { scheduleComment } from "../../util/comment";
 
 const NAME = "DocsTargetBranch";
-const SKIP_REPOS = [REPO_BRANDS, REPO_DEV_DOCUMENTATION];
 
 export const bodyShouldTargetCurrent: string =
   "It seems that this PR is targeted against an incorrect branch. Documentation updates which apply to our current stable release should target the `current` branch. Please change the target branch of this PR to `current` and rebase if needed. If this is documentation for a new feature, please add a link to that PR in your description.";
@@ -29,7 +23,7 @@ export const initDocsTargetBranch = (app: Application) => {
     ["pull_request.opened", "pull_request.edited"],
     filterEventNoBot(
       NAME,
-      filterEventByRepo(NAME, REPO_HOME_ASSISTANT_IO, runDocsTargetBranch)
+      filterEventByRepo(NAME, [REPO_DOCS], runDocsTargetBranch)
     )
   );
 };
@@ -40,7 +34,7 @@ export const runDocsTargetBranch = async (context: PRContext) => {
     context.payload.pull_request.body
   ).concat(
     extractPullRequestURLLinks(context.payload.pull_request.body).filter(
-      (link) => !SKIP_REPOS.includes(link.repo) || ORG_HASS !== link.owner
+      (link) => ORG_ESPHOME !== link.owner
     )
   );
 
@@ -81,19 +75,6 @@ const correctTargetBranchDetected = async (context: PRContext) => {
       )
     );
   }
-
-  // Typing is wrong for PRs, so use labels type from issues
-  const currentAssignees = (pr.assignees as WebhookPayloadIssuesIssue["assignees"]).map(
-    (assignee) => assignee.login
-  );
-  if (currentAssignees.includes(author)) {
-    context.log(NAME, `Removing ${author} as assignee`);
-    promises.push(
-      context.github.issues.removeAssignees(
-        context.issue({ assignees: [author] })
-      )
-    );
-  }
 };
 
 const wrongTargetBranchDetected = async (
@@ -101,7 +82,6 @@ const wrongTargetBranchDetected = async (
   correctTargetBranch: "current" | "next"
 ) => {
   const labels = ["needs-rebase", "in-progress"];
-  const author = context.payload.sender.login;
   const promises: Promise<unknown>[] = [];
   const body: string =
     correctTargetBranch === "next"
@@ -127,11 +107,6 @@ const wrongTargetBranchDetected = async (
         labels,
       })
     )
-  );
-
-  context.log(NAME, `Adding ${author} as assignee`);
-  promises.push(
-    context.github.issues.addAssignees(context.issue({ assignees: [author] }))
   );
 
   context.log(

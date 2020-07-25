@@ -1,15 +1,14 @@
 {
-  "name": "probot-home-assistant",
+  "name": "probot-esphome",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "watch": "tsc --watch",
-    "deploy": "npm run build && sls deploy --stage prod",
-    "logs": "sls logs --stage prod -f handleProbot --tail",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "dev": "npm run build && npm run start",
+    "start": "probot run ./lib/index.js",
     "test": "ts-mocha",
-    "test-watch": "ts-mocha --watch"
+    "test:watch": "ts-mocha --watch"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -21,12 +20,10 @@
     "lint-staged": "^9.2.0",
     "mocha": "^6.2.0",
     "prettier": "^1.18.2",
-    "serverless": "^1.48.0",
     "ts-mocha": "^6.0.0",
     "typescript": "^3.5.3"
   },
   "dependencies": {
-    "@probot/serverless-lambda": "^0.3.0",
     "codeowners-utils": "^1.0.0",
     "debounce": "^1.2.0",
     "ignore": "^5.1.2",

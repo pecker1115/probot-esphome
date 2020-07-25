@@ -11,16 +11,20 @@ import { initDocsMissing } from "./plugins/DocsMissing/docs_missing";
 import { initHacktoberfest } from "./plugins/Hacktoberfest/hacktoberfest";
 import { initDependencyBump } from "./plugins/DependencyBump/dependency_bump";
 
-export const probotApp = (app: Application) => {
+export = (app: Application) => {
   initLabelBot(app);
-  initCodeOwnersMention(app);
+  // We don't have a codeowner system yet
+  // initCodeOwnersMention(app);
   initIssueLinks(app);
-  initReviewEnforcer(app);
+  // Not needed
+  // initReviewEnforcer(app);
   initDocsParenting(app);
   initDocsTargetBranch(app);
   initLabelCleaner(app);
   initDocsBranchLabels(app);
   initDocsMissing(app);
-  initHacktoberfest(app);
-  initDependencyBump(app);
+
+  // initHacktoberfest(app);
+  // not needed
+  // initDependencyBump(app);
 };

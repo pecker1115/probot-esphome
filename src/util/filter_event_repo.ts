@@ -20,7 +20,7 @@ export const extractRepoFromContext = (
 
 export const filterEventByRepo = <T>(
   name: string,
-  filterRepository: string,
+  allowRepositories: string[],
   handler: (context: Context<T>) => Promise<void>
 ): ((context: Context<T>) => Promise<void>) => {
   // Wrapped handler function
@@ -34,10 +34,10 @@ export const filterEventByRepo = <T>(
 
     const repoName = repo.substr(repo.indexOf("/") + 1);
 
-    if (repoName !== filterRepository) {
+    if (allowRepositories.indexOf(repoName) == -1) {
       context.log(
         name,
-        `Skipping event because repository ${repoName} does not match ${filterRepository}.`
+        `Skipping event because repository ${repoName} does not match.`
       );
       return;
     }

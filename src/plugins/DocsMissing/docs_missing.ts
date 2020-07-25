@@ -13,7 +13,7 @@ export const initDocsMissing = (app: Application) => {
       "pull_request.unlabeled",
       "pull_request.synchronize",
     ],
-    filterEventByRepo(NAME, REPO_CORE, runDocsMissing)
+    filterEventByRepo(NAME, [REPO_CORE], runDocsMissing)
   );
 };
 
@@ -22,16 +22,33 @@ export const runDocsMissing = async (context: PRContext) => {
 
   const hasDocsMissingLabel = (pr.labels as WebhookPayloadIssuesIssue["labels"])
     .map((label) => label.name)
-    .includes("docs-missing");
+    .includes("needs-docs");
 
-  await context.github.repos.createStatus(
-    context.repo({
-      sha: pr.head.sha,
-      context: "docs-missing",
-      state: hasDocsMissingLabel ? "failure" : "success",
-      description: hasDocsMissingLabel
-        ? `Please open a documentation PR.`
-        : `Documentation ok.`,
-    })
-  );
+  if (hasDocsMissingLabel) {
+    await context.github.repos.createStatus(
+      context.repo({
+        sha: pr.head.sha,
+        context: "needs-docs",
+        state: "failure",
+        description: `Please open a documentation PR.`,
+      })
+    );
+  } else {
+    const previousCheck = (await context.github.repos.listStatusesForRef(
+      context.repo({ ref: pr.head.sha })
+    )).data
+      .filter((it) => it.state === "failure")
+      .map((it) => it.context)
+      .includes("needs-docs");
+    if (previousCheck) {
+      await context.github.repos.createStatus(
+        context.repo({
+          sha: pr.head.sha,
+          context: "needs-docs",
+          state: "success",
+          description: `Documentation ok.`,
+        })
+      );
+    }
+  }
 };

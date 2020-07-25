@@ -9,3 +9,5 @@ github-app-probot-home-assistant-key.pem
 .serverless
 .devcontainer/credentials
 .vscode
+.env
+lib

@@ -22,7 +22,7 @@ export const initDependencyBump = (app: Application) => {
     ["pull_request.opened"],
     filterEventNoBot(
       NAME,
-      filterEventByRepo(NAME, REPO_CORE, runDependencyBump)
+      filterEventByRepo(NAME, [REPO_CORE], runDependencyBump)
     )
   );
 };

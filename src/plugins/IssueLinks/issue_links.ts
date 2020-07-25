@@ -1,13 +1,16 @@
 import { LabeledIssueOrPRContext } from "../../types";
 import { Application } from "probot";
-import { REPO_CORE } from "../../const";
+import { REPO_ISSUES, REPO_FEATURE_REQUESTS } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { scheduleComment } from "../../util/comment";
 
 const NAME = "IssueLinks";
 
 export const initIssueLinks = (app: Application) => {
-  app.on(["issues.labeled"], filterEventByRepo(NAME, REPO_CORE, runIssueLinks));
+  app.on(
+    ["issues.labeled"],
+    filterEventByRepo(NAME, [REPO_ISSUES, REPO_FEATURE_REQUESTS], runIssueLinks)
+  );
 };
 
 export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
@@ -18,10 +21,11 @@ export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
   }
 
   const integrationName = labelName.split("integration: ")[1];
-  const docLink = `https://www.home-assistant.io/integrations/${integrationName}`;
-  const codeLink = `https://github.com/home-assistant/core/tree/dev/homeassistant/components/${integrationName}`;
+  const codeLink = `https://github.com/esphome/esphome/tree/dev/esphome/components/${integrationName}`;
+  const filter = encodeURIComponent(`is:pr label:${labelName}`);
+  const prsLink = `https://github.com/esphome/esphome/pulls?q=${filter}`;
 
-  const commentBody = `[${integrationName} documentation](${docLink})\n[${integrationName} source](${codeLink})`;
+  const commentBody = `[${integrationName} source](${codeLink})\n[${integrationName} recent changes](${prsLink})`;
 
   context.log(NAME, `Adding comment with links ${commentBody}`);
   scheduleComment(context, "IssueLinks", commentBody);

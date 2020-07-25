@@ -1,5 +1,6 @@
 import { ParsedPath } from "../../util/parse_path";
 import { fetchPullRequestFilesFromContext } from "../../util/pull_request";
+import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
 
 // Convert a list of file paths to labels to set
 
@@ -22,27 +23,46 @@ const NAME = "LabelBot";
 const STRATEGIES = [
   componentAndPlatform,
   newIntegrationOrPlatform,
-  removePlatform,
+  // removePlatform,
   warnOnMergeToMaster,
   markCore,
   smallPR,
   hasTests,
-  typeOfChange,
+  // typeOfChange,
 ];
 
 export const initLabelBot = (app: Application) => {
   app.on(
-    "pull_request.opened",
-    filterEventNoBot(NAME, filterEventByRepo(NAME, REPO_CORE, runLabelBot))
+    [
+      "pull_request.opened",
+      "pull_request.reopened",
+      "pull_request.synchronize",
+    ],
+    filterEventNoBot(NAME, filterEventByRepo(NAME, [REPO_CORE], runLabelBot))
   );
-
-  // app.on("issues.edited", async (context: PRContext) => {
-  //   // This is also for PRs
-  //   // context.log("Edited", context.event);
-  // });
 };
 
 export const runLabelBot = async (context: PRContext) => {
+  const pr = context.payload.pull_request;
+
+  const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
+    (label) => label.name
+  );
+
+  const managedLabels = currentLabels.filter(
+    (label) =>
+      label.startsWith("integration: ") ||
+      [
+        "new-integration",
+        "new-platform",
+        "merging-to-master",
+        "merging-to-beta",
+        "core",
+        "small-pr",
+        "has-tests",
+      ].includes(label)
+  );
+
   const files = await fetchPullRequestFilesFromContext(context);
   const parsed = files.map((file) => new ParsedPath(file));
   const labelSet = new Set();
@@ -75,4 +95,16 @@ export const runLabelBot = async (context: PRContext) => {
       labels,
     })
   );
+
+  const removeLabels = currentLabels.filter(
+    (label) => !managedLabels.includes(label) || !labels.includes(label)
+  );
+  if (removeLabels.length > 0) {
+    await context.github.issues.removeLabels(
+      // @ts-ignore
+      context.issue({
+        labels,
+      })
+    );
+  }
 };

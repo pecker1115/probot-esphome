@@ -1,17 +1,17 @@
 import { PRContext } from "../../types";
 import { Application } from "probot";
-import { REPO_HOME_ASSISTANT_IO } from "../../const";
+import { REPO_DOCS } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
 
 const NAME = "DocsBranchLabels";
 
-const BRANCHES = ["current", "rc", "next"];
+const BRANCHES = ["current", "beta", "next"];
 
 export const initDocsBranchLabels = (app: Application) => {
   app.on(
     ["pull_request.opened", "pull_request.edited"],
-    filterEventByRepo(NAME, REPO_HOME_ASSISTANT_IO, runDocsBranchLabels)
+    filterEventByRepo(NAME, [REPO_DOCS], runDocsBranchLabels)
   );
 };
 

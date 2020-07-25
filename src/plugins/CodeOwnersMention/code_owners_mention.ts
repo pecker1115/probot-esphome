@@ -12,7 +12,7 @@ const NAME = "CodeOwnersMention";
 export const initCodeOwnersMention = (app: Application) => {
   app.on(
     ["issues.labeled", "pull_request.labeled"],
-    filterEventByRepo(NAME, REPO_CORE, runCodeOwnersMention)
+    filterEventByRepo(NAME, [REPO_CORE], runCodeOwnersMention)
   );
 };
 

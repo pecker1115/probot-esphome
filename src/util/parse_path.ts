@@ -7,14 +7,9 @@ export class ParsedPath {
   public type:
     | null
     | "core"
-    | "auth"
-    | "auth_providers"
-    | "generated"
+    | "dashboard"
     | "scripts"
-    | "helpers"
-    | "util"
     | "test"
-    | "services"
     | "component"
     | "platform" = null;
   public component: null | string = null;
@@ -26,24 +21,34 @@ export class ParsedPath {
     const parts = file.filename.split("/");
     const rootFolder = parts.length > 1 ? parts.shift() : undefined;
 
-    if (!["tests", "homeassistant"].includes(rootFolder)) {
+    if (rootFolder === "script") {
+      this.type = "scripts";
+      this.core = true;
+      return;
+    }
+    if (rootFolder === "tests") {
+      this.type = "test";
+      return;
+    }
+
+    if (rootFolder !== "esphome") {
       return;
     }
 
     const subfolder = parts.shift();
 
-    if (!["components", "fixtures", "generated"].includes(subfolder)) {
+    if (subfolder === "dashboard") {
       this.core = true;
-
-      if (subfolder.endsWith(".py")) {
-        this.type = "core";
-      } else {
-        this.type = subfolder as any;
-      }
+      this.type = "dashboard";
       return;
     }
 
-    // This is not possible anymore after great migration
+    if (subfolder !== "components") {
+      this.core = true;
+      this.type = "core";
+      return;
+    }
+
     if (parts.length < 2) {
       return;
     }
@@ -51,15 +56,7 @@ export class ParsedPath {
     this.component = parts.shift();
     let filename = parts[0].replace(".py", "");
 
-    if (rootFolder === "tests") {
-      this.type = "test";
-      filename = filename.replace("test_", "");
-      if (entityComponents.includes(filename)) {
-        this.platform = filename;
-      }
-    } else if (filename === "services.yaml") {
-      this.type = "services";
-    } else if (entityComponents.includes(filename)) {
+    if (entityComponents.includes(filename)) {
       this.type = "platform";
       this.platform = filename;
     } else {

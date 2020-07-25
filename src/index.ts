@@ -19,7 +19,10 @@ export = (app: Application) => {
   // Not needed
   // initReviewEnforcer(app);
   initDocsParenting(app);
-  initDocsTargetBranch(app);
+
+  // heuristic is bad
+  //initDocsTargetBranch(app);
+
   initLabelCleaner(app);
   initDocsBranchLabels(app);
   initDocsMissing(app);

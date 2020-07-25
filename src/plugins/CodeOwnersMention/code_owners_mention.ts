@@ -1,7 +1,7 @@
 const codeownersUtils = require("codeowners-utils");
 import { LabeledIssueOrPRContext } from "../../types";
 import { Application } from "probot";
-import { REPO_ISSUES, REPO_CORE } from "../../const";
+import { REPO_ISSUES, REPO_CORE, ORG_ESPHOME } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { getIssueFromPayload } from "../../util/issue";
 import { scheduleComment } from "../../util/comment";
@@ -27,9 +27,11 @@ export const runCodeOwnersMention = async (
     return;
   }
 
-  const codeownersData = await context.github.repos.getContents(
-    context.repo({ path: "CODEOWNERS" })
-  );
+  const codeownersData = await context.github.repos.getContents({
+    owner: ORG_ESPHOME,
+    repo: REPO_CORE,
+    path: "CODEOWNERS",
+  });
 
   const integrationName = labelName.split("integration: ")[1];
 

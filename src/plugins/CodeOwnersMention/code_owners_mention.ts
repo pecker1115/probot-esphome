@@ -1,7 +1,7 @@
 const codeownersUtils = require("codeowners-utils");
 import { LabeledIssueOrPRContext } from "../../types";
 import { Application } from "probot";
-import { REPO_CORE } from "../../const";
+import { REPO_ISSUES, REPO_CORE } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { getIssueFromPayload } from "../../util/issue";
 import { scheduleComment } from "../../util/comment";
@@ -12,7 +12,7 @@ const NAME = "CodeOwnersMention";
 export const initCodeOwnersMention = (app: Application) => {
   app.on(
     ["issues.labeled", "pull_request.labeled"],
-    filterEventByRepo(NAME, [REPO_CORE], runCodeOwnersMention)
+    filterEventByRepo(NAME, [REPO_ISSUES, REPO_CORE], runCodeOwnersMention)
   );
 };
 
@@ -33,7 +33,7 @@ export const runCodeOwnersMention = async (
 
   const integrationName = labelName.split("integration: ")[1];
 
-  const path = `homeassistant/components/${integrationName}/*`;
+  const path = `esphome/components/${integrationName}/*`;
 
   const str = Buffer.from(codeownersData.data.content, "base64").toString();
 

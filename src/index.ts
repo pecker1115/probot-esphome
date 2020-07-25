@@ -13,8 +13,7 @@ import { initDependencyBump } from "./plugins/DependencyBump/dependency_bump";
 
 export = (app: Application) => {
   initLabelBot(app);
-  // We don't have a codeowner system yet
-  // initCodeOwnersMention(app);
+  initCodeOwnersMention(app);
   initIssueLinks(app);
   // Not needed
   // initReviewEnforcer(app);

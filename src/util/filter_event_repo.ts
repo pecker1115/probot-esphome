@@ -28,14 +28,14 @@ export const filterEventByRepo = <T>(
     const repo = extractRepoFromContext(context);
 
     if (!repo) {
-      context.log(name, `Skipping event because it has no repository.`);
+      context.log.debug(name, `Skipping event because it has no repository.`);
       return;
     }
 
     const repoName = repo.substr(repo.indexOf("/") + 1);
 
     if (allowRepositories.indexOf(repoName) == -1) {
-      context.log(
+      context.log.debug(
         name,
         `Skipping event because repository ${repoName} does not match.`
       );

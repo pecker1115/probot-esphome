@@ -30,11 +30,13 @@ export const runLabelCleaner = async (context: PRContext) => {
     return;
   }
   const pr = getIssueFromPayload(context);
+  context.log(NAME, `Running on ${context.repo.name}#${pr.number}`);
 
   // Typing is wrong for PRs, so use labels type from issues
   const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
     (label) => label.name
   );
+  context.log(NAME, `Current Labels: ${currentLabels}`);
 
   const labelsToRemove = TO_CLEAN[repo]
     // Find all labels that the PR has
@@ -42,12 +44,7 @@ export const runLabelCleaner = async (context: PRContext) => {
 
   // If any label delete tasks created, await them.
   if (labelsToRemove.length) {
-    context.log(
-      NAME,
-      `Cleaning up labels from ${repo} PR ${pr.number}: ${labelsToRemove.join(
-        ", "
-      )}`
-    );
+    context.log(NAME, `Cleaning up labels: ${labelsToRemove.join(", ")}`);
     await Promise.all(
       labelsToRemove.map((label) =>
         context.github.issues.removeLabel({ ...context.issue(), name: label })

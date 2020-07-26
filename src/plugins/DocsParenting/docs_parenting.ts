@@ -1,6 +1,7 @@
 import { PRContext } from "../../types";
 import { Application } from "probot";
 import { extractRepoFromContext } from "../../util/filter_event_repo";
+import { filterEventByRepo } from "../../util/filter_event_repo";
 import { REPO_DOCS, ORG_ESPHOME } from "../../const";
 import { getIssueFromPayload } from "../../util/issue";
 import {
@@ -21,23 +22,24 @@ export const initDocsParenting = (app: Application) => {
   });
   app.on(
     ["pull_request.reopened", "pull_request.closed"],
-    updateDocsParentStatus
+    filterEventByRepo(NAME, [REPO_DOCS], updateDocsParentStatus)
   );
 };
 
 // Deal with PRs on core repo
 const runDocsParentingNonDocs = async (context: PRContext) => {
   const triggerIssue = getIssueFromPayload(context);
+  context.log(
+    NAME,
+    "CORE PR",
+    `Running on ${context.repo.name}#${triggerIssue.number}`
+  );
 
   const linksToDocs = extractIssuesOrPullRequestMarkdownLinks(triggerIssue.body)
     .concat(extractPullRequestURLLinks(triggerIssue.body))
     .filter((link) => link.repo === REPO_DOCS);
 
-  context.log(
-    NAME,
-    "NON-DOC-PR",
-    `Found ${linksToDocs.length} links to doc PRs`
-  );
+  context.log(NAME, "CORE PR", `Found ${linksToDocs.length} links to doc PRs`);
 
   if (linksToDocs.length === 0) {
     return;
@@ -46,16 +48,16 @@ const runDocsParentingNonDocs = async (context: PRContext) => {
   if (linksToDocs.length > 2) {
     context.log(
       NAME,
-      "NON-DOC-PR",
-      "Not adding has-parent label because HASS PR has more than 2 links to docs PRs."
+      "CORE PR",
+      "Not adding has-parent label because core PR has more than 2 links to docs PRs."
     );
     return;
   }
 
   context.log(
     NAME,
-    "NON-DOC-PR",
-    `Adding has-parent label to doc PRS ${linksToDocs
+    "CORE PR",
+    `Adding has-parent label to docs#${linksToDocs
       .map((link) => link.number)
       .join(", ")}`
   );
@@ -73,6 +75,8 @@ const runDocsParentingNonDocs = async (context: PRContext) => {
 // Deal with PRs on Home Assistant.io repo
 const runDocsParentingDocs = async (context: PRContext) => {
   const triggerIssue = getIssueFromPayload(context);
+  context.log(NAME, "DOCS PR", `Running on docs#${triggerIssue.number}`);
+
   const linksToNonDocs = extractIssuesOrPullRequestMarkdownLinks(
     triggerIssue.body
   )
@@ -81,7 +85,7 @@ const runDocsParentingDocs = async (context: PRContext) => {
 
   context.log(
     NAME,
-    "DOC-PR",
+    "DOCS PR",
     `Found ${linksToNonDocs.length} links to non-doc PRs`
   );
 
@@ -91,8 +95,8 @@ const runDocsParentingDocs = async (context: PRContext) => {
 
   context.log(
     NAME,
-    "DOC-PR",
-    `Adding has-parent label to doc PR ${triggerIssue.number}`
+    "DOCS PR",
+    `Adding has-parent label to docs#${triggerIssue.number}`
   );
 
   await context.github.issues.addLabels({
@@ -108,18 +112,16 @@ const runDocsParentingDocs = async (context: PRContext) => {
  *  - parent merged: add label "parent-merged"
  */
 const updateDocsParentStatus = async (context: PRContext) => {
-  if (extractRepoFromContext(context) === REPO_DOCS) {
-    return;
-  }
-  const log = (msg: string) => context.log(NAME, "PARENT-STATUS-SYNC", msg);
+  const log = (msg: string) => context.log(NAME, "PARENT PR", msg);
 
   const pr = context.payload.pull_request;
+  log(`Running on docs#${pr.number}`);
 
   const linksToDocs = extractIssuesOrPullRequestMarkdownLinks(pr.body).filter(
     (link) => link.repo === REPO_DOCS
   );
 
-  log(`PR ${pr.number} contains ${linksToDocs.length} links to doc PRs`);
+  log(`PR contains ${linksToDocs.length} links to doc PRs`);
 
   if (linksToDocs.length !== 1) {
     if (linksToDocs.length > 1) {

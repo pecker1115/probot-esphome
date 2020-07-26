@@ -22,11 +22,20 @@ export const runCodeOwnersMention = async (
   const labelName = context.payload.label.name;
   const triggerIssue = getIssueFromPayload(context);
   const triggerURL = triggerIssue.html_url;
+  context.log(
+    NAME,
+    `Running for issue ${context.repo.name}#${triggerIssue.number} and label "${labelName}"`
+  );
 
   if (labelName.indexOf("integration: ") === -1) {
+    context.log(NAME, ` -> Not an integration label.`);
     return;
   }
 
+  context.log.debug(
+    NAME,
+    `Loading CODEOWNERS from ${ORG_ESPHOME}/${REPO_CORE}`
+  );
   const codeownersData = await context.github.repos.getContents({
     owner: ORG_ESPHOME,
     repo: REPO_CORE,
@@ -34,18 +43,12 @@ export const runCodeOwnersMention = async (
   });
 
   const integrationName = labelName.split("integration: ")[1];
-
+  context.log.debug(NAME, `Integration name: ${integrationName}`);
   const path = `esphome/components/${integrationName}/*`;
-
   const str = Buffer.from(codeownersData.data.content, "base64").toString();
-
-  if (str.indexOf(integrationName) === -1) {
-    context.log(NAME, `Integration ${integrationName} not in CODEOWNERS`);
-    return;
-  }
-
   const entries = parse(str);
   const match = codeownersUtils.matchFile(path, entries);
+  context.log.debug(NAME, "Matches: ", match);
 
   if (!match) {
     context.log(NAME, `No match found in CODEOWNERS for ${path}`);
@@ -96,7 +99,7 @@ export const runCodeOwnersMention = async (
       `Adding comment to ${triggerLabel} ${triggerURL}: ${commentBody}`
     );
 
-    scheduleComment(context, "CodeOwnersMention", commentBody);
+    scheduleComment(context, NAME, commentBody);
   }
 
   // Add a label if author of issue/PR is a code owner

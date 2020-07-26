@@ -44,10 +44,12 @@ export const initLabelBot = (app: Application) => {
 
 export const runLabelBot = async (context: PRContext) => {
   const pr = context.payload.pull_request;
+  context.log(NAME, `Running on PR ${context.repo.name}#${pr.number}`);
 
   const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
     (label) => label.name
   );
+  context.log.debug(NAME, `current labels: ${currentLabels}`);
 
   const managedLabels = currentLabels.filter(
     (label) =>
@@ -62,6 +64,7 @@ export const runLabelBot = async (context: PRContext) => {
         "has-tests",
       ].includes(label)
   );
+  context.log.debug(NAME, `of those are managed: ${managedLabels}`);
 
   const files = await fetchPullRequestFilesFromContext(context);
   const parsed = files.map((file) => new ParsedPath(file));
@@ -72,38 +75,46 @@ export const runLabelBot = async (context: PRContext) => {
       labelSet.add(label);
     }
   });
+  context.log.debug(NAME, `computed labels: ${labelSet}`);
 
   const labels = Array.from(labelSet);
 
-  if (labels.length === 0 || labels.length > 9) {
+  if (labels.length > 15) {
     context.log(
-      `LabelBot: Not setting ${labels.length} labels because out of range of what we allow`
+      NAME,
+      `Not setting ${labels.length} labels because out of range of what we allow`
     );
-    return;
+  } else if (labels.length > 0) {
+    context.log(
+      NAME,
+      `Setting labels on PR ${
+        context.payload.pull_request.number
+      }: ${labels.join(", ")}`
+    );
+
+    await context.github.issues.addLabels(
+      // Bug in Probot: https://github.com/probot/probot/issues/917
+      // @ts-ignore
+      context.issue({
+        labels,
+      })
+    );
   }
-
-  context.log(
-    `LabelBot: Setting labels on PR ${
-      context.payload.pull_request.number
-    }: ${labels.join(", ")}`
-  );
-
-  await context.github.issues.addLabels(
-    // Bug in Probot: https://github.com/probot/probot/issues/917
-    // @ts-ignore
-    context.issue({
-      labels,
-    })
-  );
 
   const removeLabels = currentLabels.filter(
     (label) => !managedLabels.includes(label) || !labels.includes(label)
   );
   if (removeLabels.length > 0) {
+    context.log(
+      NAME,
+      `Removing labels on PR ${
+        context.payload.pull_request.number
+      }: ${removeLabels.join(", ")}`
+    );
     await context.github.issues.removeLabels(
       // @ts-ignore
       context.issue({
-        labels,
+        removeLabels,
       })
     );
   }

@@ -3,6 +3,7 @@ import { Application } from "probot";
 import { REPO_ISSUES, REPO_FEATURE_REQUESTS } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { scheduleComment } from "../../util/comment";
+import { getIssueFromPayload } from "../../util/issue";
 
 const NAME = "IssueLinks";
 
@@ -14,7 +15,12 @@ export const initIssueLinks = (app: Application) => {
 };
 
 export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
+  const triggerIssue = getIssueFromPayload(context);
   const labelName = context.payload.label.name;
+  context.log(
+    NAME,
+    `Running for issue ${context.repo.name}#${triggerIssue.number} and label "${labelName}"`
+  );
 
   if (labelName.indexOf("integration: ") === -1) {
     return;
@@ -34,5 +40,5 @@ export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
   ].join("\n");
 
   context.log(NAME, `Adding comment with links ${commentBody}`);
-  scheduleComment(context, "IssueLinks", commentBody);
+  scheduleComment(context, NAME, commentBody);
 };

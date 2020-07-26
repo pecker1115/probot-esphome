@@ -24,7 +24,7 @@ export const runCodeOwnersMention = async (
   const triggerURL = triggerIssue.html_url;
   context.log(
     NAME,
-    `Running for issue ${context.repo.name}#${triggerIssue.number} and label "${labelName}"`
+    `Running for issue ${context.payload.repository.name}#${triggerIssue.number} and label "${labelName}"`
   );
 
   if (labelName.indexOf("integration: ") === -1) {

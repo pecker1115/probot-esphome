@@ -17,7 +17,10 @@ export const initDocsBranchLabels = (app: Application) => {
 
 export const runDocsBranchLabels = async (context: PRContext) => {
   const pr = context.payload.pull_request;
-  context.log(NAME, `Running on ${context.repo.name}#${pr.number}`);
+  context.log(
+    NAME,
+    `Running on ${context.payload.repository.name}#${pr.number}`
+  );
 
   const targetBranch = pr.base.ref;
   // Typing is wrong for PRs, so use labels type from issues

@@ -11,7 +11,7 @@ const NAME = "LabelCleaner";
 const TO_CLEAN: { [key: string]: string[] } = {
   [REPO_CORE]: ["ready-for-review"],
   [REPO_DOCS]: [
-    "needs-rebase",
+    "wrong-base-branch",
     "in-progress",
     "awaits-parent",
     "ready-for-review",
@@ -30,7 +30,10 @@ export const runLabelCleaner = async (context: PRContext) => {
     return;
   }
   const pr = getIssueFromPayload(context);
-  context.log(NAME, `Running on ${context.repo.name}#${pr.number}`);
+  context.log(
+    NAME,
+    `Running on ${context.payload.repository.name}#${pr.number}`
+  );
 
   // Typing is wrong for PRs, so use labels type from issues
   const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(

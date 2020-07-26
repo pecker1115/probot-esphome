@@ -19,7 +19,10 @@ export const initDocsMissing = (app: Application) => {
 
 export const runDocsMissing = async (context: PRContext) => {
   const pr = context.payload.pull_request;
-  context.log(NAME, `Running on PR ${context.repo.name}#${pr.number}`);
+  context.log(
+    NAME,
+    `Running on PR ${context.payload.repository.name}#${pr.number}`
+  );
 
   const hasDocsMissingLabel = (pr.labels as WebhookPayloadIssuesIssue["labels"])
     .map((label) => label.name)
@@ -36,9 +39,11 @@ export const runDocsMissing = async (context: PRContext) => {
       })
     );
   } else {
-    const previousCheck = (await context.github.repos.listStatusesForRef(
-      context.repo({ ref: pr.head.sha })
-    )).data
+    const previousCheck = (
+      await context.github.repos.listStatusesForRef(
+        context.repo({ ref: pr.head.sha })
+      )
+    ).data
       .filter((it) => it.state === "failure")
       .map((it) => it.context)
       .includes("needs-docs");

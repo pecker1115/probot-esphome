@@ -44,7 +44,10 @@ export const initLabelBot = (app: Application) => {
 
 export const runLabelBot = async (context: PRContext) => {
   const pr = context.payload.pull_request;
-  context.log(NAME, `Running on PR ${context.repo.name}#${pr.number}`);
+  context.log(
+    NAME,
+    `Running on PR ${context.payload.repository.name}#${pr.number}`
+  );
 
   const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
     (label) => label.name

@@ -64,13 +64,13 @@ const correctTargetBranchDetected = async (context: PRContext) => {
   const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
     (label) => label.name
   );
-  if (currentLabels.includes("needs-rebase")) {
+  if (currentLabels.includes("wrong-base-branch")) {
     promises.push(
       context.github.issues.removeLabel(
         // Bug in Probot: https://github.com/probot/probot/issues/917
         // @ts-ignore
         context.issue({
-          label: "needs-rebase",
+          label: "wrong-base-branch",
         })
       )
     );
@@ -81,7 +81,7 @@ const wrongTargetBranchDetected = async (
   context: PRContext,
   correctTargetBranch: "current" | "next"
 ) => {
-  const labels = ["needs-rebase", "in-progress"];
+  const labels = ["wrong-base-branch", "in-progress"];
   const promises: Promise<unknown>[] = [];
   const body: string =
     correctTargetBranch === "next"
@@ -93,8 +93,9 @@ const wrongTargetBranchDetected = async (
   const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
     (label) => label.name
   );
-  if (currentLabels.includes("needs-rebase")) {
-    // If the label "needs-rebase" already exsist we can assume that this action has run, and we should ignore it.
+  if (currentLabels.includes("wrong-base-branch")) {
+    // If the label "wrong-base-branch" already exsist we can assume that this action has run,
+    // and we should ignore it.
     return;
   }
 

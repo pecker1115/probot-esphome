@@ -32,7 +32,7 @@ const runDocsParentingNonDocs = async (context: PRContext) => {
   context.log(
     NAME,
     "CORE PR",
-    `Running on ${context.repo.name}#${triggerIssue.number}`
+    `Running on ${context.payload.repository.name}#${triggerIssue.number}`
   );
 
   const linksToDocs = extractIssuesOrPullRequestMarkdownLinks(triggerIssue.body)

@@ -1,14 +1,6 @@
-import { PullsListFilesResponseItem, PullsGetResponse } from "@octokit/rest";
 import { PRContext } from "../types";
 import { GitHubAPI } from "probot/lib/github";
-
-interface PRContextPatched extends PRContext {
-  _prFiles?: Promise<PullsListFilesResponseItem[]>;
-}
-
-interface GitHubAPIpatched extends GitHubAPI {
-  _hassPullsCache?: { [key: string]: Promise<PullsGetResponse> };
-}
+import { Octokit } from "@octokit/rest";
 
 export const fetchPRWithCache = async (
   github: GitHubAPI,
@@ -16,37 +8,21 @@ export const fetchPRWithCache = async (
   repo: string,
   number: number
 ) => {
-  const patchedContext = github as GitHubAPIpatched;
-  const key = `${owner}/${repo}/${number}`;
-
-  if (!patchedContext._hassPullsCache) {
-    patchedContext._hassPullsCache = {};
-  }
-
-  if (!(key in patchedContext._hassPullsCache)) {
-    patchedContext._hassPullsCache[key] = github.pulls
-      .get({
-        owner,
-        repo,
-        pull_number: number,
-      })
-      .then(({ data }) => data);
-  }
-
-  return patchedContext._hassPullsCache[key];
+  return github.pulls
+    .get({
+      owner,
+      repo,
+      pull_number: number,
+    })
+    .then(({ data }) => data);
 };
 
 export const fetchPullRequestFilesFromContext = (
   context: PRContext
-): Promise<PullsListFilesResponseItem[]> => {
-  const prContext = context as PRContextPatched;
-
-  if (!prContext._prFiles) {
-    prContext._prFiles = prContext.github.pulls
-      .listFiles(prContext.issue())
-      .then(({ data }) => data);
-  }
-  return prContext._prFiles;
+): Promise<Octokit.PullsListFilesResponse> => {
+  return context.github.pulls
+    .listFiles(context.issue())
+    .then(({ data }) => data);
 };
 
 export const getPRState = (pr: { state: string; merged: boolean }) =>

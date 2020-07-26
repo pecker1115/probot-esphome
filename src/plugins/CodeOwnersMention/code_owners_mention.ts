@@ -45,7 +45,10 @@ export const runCodeOwnersMention = async (
   const integrationName = labelName.split("integration: ")[1];
   context.log.debug(NAME, `Integration name: ${integrationName}`);
   const path = `esphome/components/${integrationName}/*`;
-  const str = Buffer.from(codeownersData.data.content, "base64").toString();
+  let str = "";
+  if ("content" in codeownersData.data) {
+    str = Buffer.from(codeownersData.data.content, "base64").toString();
+  }
   const entries = parse(str);
   const match = codeownersUtils.matchFile(path, entries);
   context.log.debug(NAME, "Matches: ", match);
@@ -60,7 +63,10 @@ export const runCodeOwnersMention = async (
     (usr) => usr.substring(1).toLowerCase()
   );
 
-  const codeownersLine = `${codeownersData.data.html_url}#L${match.line}`;
+  let codeownersLine = "";
+  if ("html_url" in codeownersData.data) {
+    codeownersLine = `${codeownersData.data.html_url}#L${match.line}`;
+  }
 
   // The type for the PR payload is wrong for assignees. Cast it to issue. type is the same.
   const assignees = (triggerIssue.assignees as WebhookPayloadIssuesIssue["assignees"]).map(

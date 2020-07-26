@@ -1,8 +1,8 @@
-import { PullsListFilesResponseItem } from "@octokit/rest";
+import { Octokit } from "@octokit/rest";
 import { entityComponents, coreComponents } from "../const";
 
 export class ParsedDocsPath {
-  public file: PullsListFilesResponseItem;
+  public file: Octokit.PullsListFilesResponseItem;
   public type:
     | "integration"
     | "core"
@@ -13,7 +13,7 @@ export class ParsedDocsPath {
   public component: null | string = null;
   public platform: null | string = null;
 
-  constructor(file: PullsListFilesResponseItem) {
+  constructor(file: Octokit.PullsListFilesResponseItem) {
     this.file = file;
     const parts = file.filename.split("/");
     if (parts.length === 0) {

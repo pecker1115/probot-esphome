@@ -127,14 +127,11 @@ export const runLabelBot = async (context: PRContext) => {
         context.payload.pull_request.number
       }: ${removeLabels.join(", ")}`
     );
-    promises.push(
-      context.github.issues.removeLabels(
-        // @ts-ignore
-        context.issue({
-          labels: removeLabels,
-        })
-      )
-    );
+    removeLabels.forEach((label) => {
+      promises.push(
+        context.github.issues.removeLabel({ ...context.issue(), name: label })
+      );
+    });
   }
 
   await Promise.all(promises);

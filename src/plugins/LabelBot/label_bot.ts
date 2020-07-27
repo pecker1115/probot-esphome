@@ -118,7 +118,7 @@ export const runLabelBot = async (context: PRContext) => {
   }
 
   const removeLabels = currentLabels.filter(
-    (label) => !managedLabels.includes(label) || !labels.includes(label)
+    (label) => managedLabels.includes(label) && !labels.includes(label)
   );
   if (removeLabels.length > 0) {
     context.log(

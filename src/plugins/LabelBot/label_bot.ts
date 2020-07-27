@@ -12,6 +12,7 @@ import markCore from "./strategies/markCore";
 import smallPR from "./strategies/smallPR";
 import hasTests from "./strategies/hasTests";
 import typeOfChange from "./strategies/typeOfChange";
+import markDashboard from "./strategies/markDashboard";
 import { PRContext } from "../../types";
 import { Application } from "probot";
 import { filterEventByRepo } from "../../util/filter_event_repo";
@@ -29,6 +30,7 @@ const STRATEGIES = [
   smallPR,
   hasTests,
   // typeOfChange,
+  markDashboard,
 ];
 
 export const initLabelBot = (app: Application) => {
@@ -52,7 +54,10 @@ export const runLabelBot = async (context: PRContext) => {
   const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
     (label) => label.name
   );
-  context.log.debug(NAME, `current labels: ${currentLabels}`);
+  const currentLabelsStr = currentLabels
+    .map((label) => `"${label}"`)
+    .join(", ");
+  context.log.debug(NAME, `current labels: ${currentLabelsStr}`);
 
   const managedLabels = currentLabels.filter(
     (label) =>
@@ -64,10 +69,14 @@ export const runLabelBot = async (context: PRContext) => {
         "merging-to-beta",
         "core",
         "small-pr",
+        "dashboard",
         "has-tests",
       ].includes(label)
   );
-  context.log.debug(NAME, `of those are managed: ${managedLabels}`);
+  const managedLabelsStr = managedLabels
+    .map((label) => `"${label}"`)
+    .join(", ");
+  context.log.debug(NAME, `of those are managed: ${managedLabelsStr}`);
 
   const files = await fetchPullRequestFilesFromContext(context);
   const parsed = files.map((file) => new ParsedPath(file));
@@ -78,9 +87,11 @@ export const runLabelBot = async (context: PRContext) => {
       labelSet.add(label);
     }
   });
-  context.log.debug(NAME, `computed labels: ${labelSet}`);
-
   const labels = Array.from(labelSet);
+  const labelStr = labels.map((label) => `"${label}"`).join(", ");
+  context.log.debug(NAME, `computed labels: ${labelStr}`);
+
+  const promises: Promise<unknown>[] = [];
 
   if (labels.length > 15) {
     context.log(
@@ -95,12 +106,14 @@ export const runLabelBot = async (context: PRContext) => {
       }: ${labels.join(", ")}`
     );
 
-    await context.github.issues.addLabels(
-      // Bug in Probot: https://github.com/probot/probot/issues/917
-      // @ts-ignore
-      context.issue({
-        labels,
-      })
+    promises.push(
+      context.github.issues.addLabels(
+        // Bug in Probot: https://github.com/probot/probot/issues/917
+        // @ts-ignore
+        context.issue({
+          labels: labels,
+        })
+      )
     );
   }
 
@@ -114,11 +127,15 @@ export const runLabelBot = async (context: PRContext) => {
         context.payload.pull_request.number
       }: ${removeLabels.join(", ")}`
     );
-    await context.github.issues.removeLabels(
-      // @ts-ignore
-      context.issue({
-        removeLabels,
-      })
+    promises.push(
+      context.github.issues.removeLabels(
+        // @ts-ignore
+        context.issue({
+          labels: removeLabels,
+        })
+      )
     );
   }
+
+  await Promise.all(promises);
 };

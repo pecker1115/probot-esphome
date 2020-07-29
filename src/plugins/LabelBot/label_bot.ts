@@ -87,6 +87,13 @@ export const runLabelBot = async (context: PRContext) => {
       labelSet.add(label);
     }
   });
+  if (context.payload.pull_request.base.ref !== "dev") {
+    // when base ref is not dev, only use merging-to-* tags.
+    labelSet.clear();
+    for (let label of warnOnMergeToMaster(context, parsed)) {
+      labelSet.add(label);
+    }
+  }
   const labels = Array.from(labelSet);
   const labelStr = labels.map((label) => `"${label}"`).join(", ");
   context.log.debug(NAME, `computed labels: ${labelStr}`);

@@ -12,7 +12,7 @@ describe("LabelBotPlugin", () => {
         pull_request: {
           // @ts-ignore
           base: {
-            ref: "master",
+            ref: "release",
           },
         },
       },
@@ -33,7 +33,7 @@ describe("LabelBotPlugin", () => {
       ],
     });
     assert.deepEqual(setLabels, {
-      labels: ["integration: mqtt", "merging-to-master", "core"],
+      labels: ["integration: mqtt", "merging-to-release", "core"],
     });
   });
 });

@@ -7,7 +7,7 @@ import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
 import componentAndPlatform from "./strategies/componentAndPlatform";
 import newIntegrationOrPlatform from "./strategies/newIntegrationOrPlatform";
 import removePlatform from "./strategies/removePlatform";
-import warnOnMergeToMaster from "./strategies/warnOnMergeToMaster";
+import warnOnMergeToRelease from "./strategies/warnOnMergeToRelease";
 import markCore from "./strategies/markCore";
 import smallPR from "./strategies/smallPR";
 import hasTests from "./strategies/hasTests";
@@ -25,7 +25,7 @@ const STRATEGIES = [
   componentAndPlatform,
   newIntegrationOrPlatform,
   // removePlatform,
-  warnOnMergeToMaster,
+  warnOnMergeToRelease,
   markCore,
   smallPR,
   hasTests,
@@ -65,7 +65,7 @@ export const runLabelBot = async (context: PRContext) => {
       [
         "new-integration",
         "new-platform",
-        "merging-to-master",
+        "merging-to-release",
         "merging-to-beta",
         "core",
         "small-pr",
@@ -90,7 +90,7 @@ export const runLabelBot = async (context: PRContext) => {
   if (context.payload.pull_request.base.ref !== "dev") {
     // when base ref is not dev, only use merging-to-* tags.
     labelSet.clear();
-    for (let label of warnOnMergeToMaster(context, parsed)) {
+    for (let label of warnOnMergeToRelease(context, parsed)) {
       labelSet.add(label);
     }
   }

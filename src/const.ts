@@ -4,6 +4,8 @@ export const REPO_DOCS = "esphome-docs";
 export const REPO_ISSUES = "issues";
 export const REPO_FEATURE_REQUESTS = "feature-requests";
 
+export const COMMENT_DEBOUNCE_TIME = 500;
+
 export const entityComponents = [
   "binary_sensor",
   "climate",

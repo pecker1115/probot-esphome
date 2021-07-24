@@ -67,5 +67,5 @@ const checkPythonPRFiles = async (context: PRContext) => {
 };
 
 const markForReview = async (context: PRContext) => {
-  scheduleComment(context, "ReviewEnforcer", commentBody);
+  await scheduleComment(context, "ReviewEnforcer", commentBody);
 };

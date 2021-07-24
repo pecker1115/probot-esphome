@@ -40,5 +40,5 @@ export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
   ].join("\n");
 
   log.info(`Adding comment with links ${commentBody}`);
-  scheduleComment(context, NAME, commentBody);
+  await scheduleComment(context as any, NAME, commentBody);
 };

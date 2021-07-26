@@ -11,6 +11,7 @@ import warnOnMergeToRelease from "./strategies/warnOnMergeToRelease";
 import markCore from "./strategies/markCore";
 import smallPR from "./strategies/smallPR";
 import hasTests from "./strategies/hasTests";
+import needsTests from "./strategies/needsTests";
 import typeOfChange from "./strategies/typeOfChange";
 import markDashboard from "./strategies/markDashboard";
 import { PRContext } from "../../types";
@@ -29,6 +30,7 @@ const STRATEGIES = [
   markCore,
   smallPR,
   hasTests,
+  needsTests,
   // typeOfChange,
   markDashboard,
 ];
@@ -71,6 +73,7 @@ export const runLabelBot = async (context: PRContext) => {
         "small-pr",
         "dashboard",
         "has-tests",
+        "needs-tests",
       ].includes(label)
   );
   const managedLabelsStr = managedLabels
@@ -80,17 +83,18 @@ export const runLabelBot = async (context: PRContext) => {
 
   const files = await fetchPullRequestFilesFromContext(context);
   const parsed = files.map((file) => new ParsedPath(file));
-  const labelSet = new Set();
+  const labelSet = new Set<string>();
 
   STRATEGIES.forEach((strategy) => {
-    for (let label of strategy(context, parsed)) {
+    for (let label of strategy(context, parsed, labelSet)) {
       labelSet.add(label);
     }
   });
+
   if (context.payload.pull_request.base.ref !== "dev") {
     // when base ref is not dev, only use merging-to-* tags.
     labelSet.clear();
-    for (let label of warnOnMergeToRelease(context, parsed)) {
+    for (let label of warnOnMergeToRelease(context, parsed, labelSet)) {
       labelSet.add(label);
     }
   }

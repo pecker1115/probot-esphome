@@ -1,5 +1,6 @@
 import { Application, Context } from "probot";
 import { initLabelBot } from "./plugins/LabelBot/label_bot";
+import { initNeedsDocsLabel } from "./plugins/NeedsDocsLabel/needs_docs_label";
 import { initIssueLinks } from "./plugins/IssueLinks/issue_links";
 import { initCodeOwnersMention } from "./plugins/CodeOwnersMention/code_owners_mention";
 import { initReviewEnforcer } from "./plugins/ReviewEnforcer/review_enforcer";
@@ -13,6 +14,7 @@ import { initDependencyBump } from "./plugins/DependencyBump/dependency_bump";
 
 export = (app: Application) => {
   initLabelBot(app);
+  initNeedsDocsLabel(app);
   initCodeOwnersMention(app);
   initIssueLinks(app);
   // Not needed

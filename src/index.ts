@@ -11,6 +11,7 @@ import { initDocsBranchLabels } from "./plugins/DocsBranchLabels/docs_branch_lab
 import { initDocsMissing } from "./plugins/DocsMissing/docs_missing";
 import { initHacktoberfest } from "./plugins/Hacktoberfest/hacktoberfest";
 import { initDependencyBump } from "./plugins/DependencyBump/dependency_bump";
+import { initNeedsCodeownersLabel } from "./plugins/NeedsCodeownersLabel/needs_codeowners_label";
 
 export = (app: Application) => {
   initLabelBot(app);
@@ -32,4 +33,5 @@ export = (app: Application) => {
   // initHacktoberfest(app);
   // not needed
   // initDependencyBump(app);
+  initNeedsCodeownersLabel(app);
 };

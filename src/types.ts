@@ -8,5 +8,6 @@ import {
 
 export type PRContext = Context<WebhookPayloadPullRequest>;
 export type IssueContext = Context<WebhookPayloadIssues>;
+export type LabeledPRContext = PRContext & Context<WebhookPayloadLabel>;
 export type LabeledIssueOrPRContext = (PRContext | IssueContext) &
   Context<WebhookPayloadLabel>;

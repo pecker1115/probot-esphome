@@ -16,7 +16,8 @@ export = (app: Application) => {
   initLabelBot(app);
   initNeedsDocsLabel(app);
   initCodeOwnersMention(app);
-  initIssueLinks(app);
+  // disabled - not really useful
+  // initIssueLinks(app);
   // Not needed
   // initReviewEnforcer(app);
   initDocsParenting(app);

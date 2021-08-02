@@ -18,8 +18,6 @@ export const initNeedsDocsLabel = (app: Probot) => {
 };
 
 export const runNeedsDocsLabel = async (context: PRContext) => {
-  console.log(context);
-
   const pr = context.payload.pull_request;
   context.log.debug(
     NAME,

@@ -1,5 +1,5 @@
 import { LabeledIssueOrPRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import { REPO_ISSUES, REPO_FEATURE_REQUESTS } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { scheduleComment } from "../../util/comment";
@@ -7,7 +7,7 @@ import { getIssueFromPayload } from "../../util/issue";
 
 const NAME = "IssueLinks";
 
-export const initIssueLinks = (app: Application) => {
+export const initIssueLinks = (app: Probot) => {
   app.on(
     ["issues.labeled"],
     filterEventByRepo(NAME, [REPO_ISSUES], runIssueLinks)
@@ -15,7 +15,7 @@ export const initIssueLinks = (app: Application) => {
 };
 
 export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
-  const triggerIssue = getIssueFromPayload(context);
+  const triggerIssue = getIssueFromPayload(context as any);
   const labelName = context.payload.label.name;
   context.log(
     NAME,

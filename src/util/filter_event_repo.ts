@@ -1,15 +1,15 @@
 import { Context } from "probot";
-import { PayloadRepository } from "@octokit/webhooks";
+import { Repository } from "@octokit/webhooks-types";
+import { WebhookEvents } from "../types";
+import { ProbotWebhooks } from "probot/lib/types";
 
-export const extractRepoFromContext = (
-  context: Context<any>
-): string | undefined => {
+export const extractRepoFromContext = (context: any): string | undefined => {
   let repo: string | undefined;
   const anyContext = context as any;
 
   // PayloadWithRepository events
   if (anyContext.payload && anyContext.payload.repository) {
-    repo = (anyContext.payload.repository as PayloadRepository).name;
+    repo = (anyContext.payload.repository as Repository).name;
     // The other events
   } else if (anyContext.repository) {
     const fullRepo = anyContext.repository;
@@ -18,13 +18,13 @@ export const extractRepoFromContext = (
   return repo;
 };
 
-export const filterEventByRepo = <T>(
+export const filterEventByRepo = (
   name: string,
   allowRepositories: string[],
-  handler: (context: Context<T>) => Promise<void>
-): ((context: Context<T>) => Promise<void>) => {
+  handler: (context: any) => Promise<void>
+): ((context: any) => Promise<void>) => {
   // Wrapped handler function
-  return async (context: Context<T>) => {
+  return async (context: Context) => {
     const repo = extractRepoFromContext(context);
 
     if (!repo) {
@@ -42,6 +42,6 @@ export const filterEventByRepo = <T>(
       return;
     }
 
-    await handler(context);
+    await handler(context as any);
   };
 };

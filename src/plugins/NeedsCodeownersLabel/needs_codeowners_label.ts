@@ -1,19 +1,16 @@
-import { LabeledPRContext, PRContext } from "../../types";
-import { Application } from "probot";
+import { LabeledOrUnlabeledPRContext, PRContext } from "../../types";
+import { Context, Probot } from "probot";
 import { REPO_CORE } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { scheduleComment } from "../../util/comment";
 import { fetchPullRequestFilesFromContext } from "../../util/pull_request";
-import {
-  WebhookPayloadPullRequestPullRequest,
-  WebhookPayloadIssuesIssue,
-} from "@octokit/webhooks";
+import { PullRequest } from "@octokit/webhooks-types";
 
 const NAME = "NeedsCodeownersLabel";
 const NEEDS_CODEOWNERS_LABEL = "needs-codeowners";
 const NEW_INTEGRATION_LABEL = "new-integration";
 
-export const initNeedsCodeownersLabel = (app: Application) => {
+export const initNeedsCodeownersLabel = (app: Probot) => {
   app.on(
     ["pull_request.labeled", "pull_request.unlabeled"],
     filterEventByRepo(NAME, [REPO_CORE], runLabeled)
@@ -29,13 +26,11 @@ const hasEditedCodeowners = async (context: PRContext) => {
   return files.some((file) => file.filename == "CODEOWNERS");
 };
 
-const getLabelNames = (pr: WebhookPayloadPullRequestPullRequest) => {
-  return (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
-    (label) => label.name
-  );
+const getLabelNames = (pr: PullRequest) => {
+  return pr.labels.map((label) => label.name);
 };
 
-const runLabeled = async (context: LabeledPRContext) => {
+const runLabeled = async (context: LabeledOrUnlabeledPRContext) => {
   const pr = context.payload.pull_request;
   const label = context.payload.label.name;
 
@@ -66,23 +61,23 @@ const runLabeled = async (context: LabeledPRContext) => {
     scheduleComment(context, NAME, commentBody);
   } else if (action === "labeled" && isNewIntegration) {
     // When adding new-integration label check if we should add the needs-codeowners label
-    const edited = await hasEditedCodeowners(context);
+    const edited = await hasEditedCodeowners(context as any);
     if (!edited) {
-      await context.github.issues.addLabels(
+      await context.octokit.issues.addLabels(
         context.issue({ labels: [NEEDS_CODEOWNERS_LABEL] })
       );
     }
-  } else if (action == "unlabeled" && isNewIntegration) {
+  } else if (action === "unlabeled" && isNewIntegration) {
     // When removing new-integration label, remove needs-codeowners label
     if (getLabelNames(pr).some((name) => name === NEEDS_CODEOWNERS_LABEL)) {
-      await context.github.issues.removeLabel(
+      await context.octokit.issues.removeLabel(
         context.issue({ name: NEEDS_CODEOWNERS_LABEL })
       );
     }
   }
 };
 
-const runSynchronize = async (context: PRContext) => {
+const runSynchronize = async (context: Context<"pull_request.synchronize">) => {
   const pr = context.payload.pull_request;
   context.log.debug(
     NAME,
@@ -95,12 +90,12 @@ const runSynchronize = async (context: PRContext) => {
   if (!hasCodeownersLabel) {
     return;
   }
-  const edited = await hasEditedCodeowners(context);
+  const edited = await hasEditedCodeowners(context as any);
   if (!edited) {
     return;
   }
 
-  await context.github.issues.removeLabel(
+  await context.octokit.issues.removeLabel(
     context.issue({ name: NEEDS_CODEOWNERS_LABEL })
   );
 };

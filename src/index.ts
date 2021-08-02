@@ -1,4 +1,4 @@
-import { Application, Context } from "probot";
+import { Probot } from "probot";
 import { initLabelBot } from "./plugins/LabelBot/label_bot";
 import { initNeedsDocsLabel } from "./plugins/NeedsDocsLabel/needs_docs_label";
 import { initIssueLinks } from "./plugins/IssueLinks/issue_links";
@@ -13,7 +13,7 @@ import { initHacktoberfest } from "./plugins/Hacktoberfest/hacktoberfest";
 import { initDependencyBump } from "./plugins/DependencyBump/dependency_bump";
 import { initNeedsCodeownersLabel } from "./plugins/NeedsCodeownersLabel/needs_codeowners_label";
 
-export = (app: Application) => {
+export = (app: Probot) => {
   initLabelBot(app);
   initNeedsDocsLabel(app);
   initCodeOwnersMention(app);

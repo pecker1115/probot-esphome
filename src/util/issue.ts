@@ -1,17 +1,12 @@
-import { PRContext, IssueContext } from "../types";
-import {
-  WebhookPayloadIssuesIssue,
-  WebhookPayloadPullRequestPullRequest,
-} from "@octokit/webhooks";
-import { GitHubAPI } from "probot/lib/github";
+import { IssueOrPRContext, Octokit, IssueOrPullRequest } from "../types";
 
 export const fetchIssueWithCache = async (
-  github: GitHubAPI,
+  octokit: Octokit,
   owner: string,
   repo: string,
   number: number
 ) => {
-  return github.issues
+  return octokit.issues
     .get({
       owner,
       repo,
@@ -22,8 +17,8 @@ export const fetchIssueWithCache = async (
 
 // PRs are shaped as issues. This method will help normalize it.
 export const getIssueFromPayload = (
-  context: PRContext | IssueContext
-): WebhookPayloadIssuesIssue | WebhookPayloadPullRequestPullRequest => {
+  context: IssueOrPRContext
+): IssueOrPullRequest => {
   if (context.name === "issues") {
     return context.payload["issue"];
   }

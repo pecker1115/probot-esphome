@@ -1,5 +1,5 @@
 import { PRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import { extractRepoFromContext } from "../../util/filter_event_repo";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { REPO_DOCS, ORG_ESPHOME } from "../../const";
@@ -12,7 +12,7 @@ import { getPRState } from "../../util/pull_request";
 
 const NAME = "DocsParenting";
 
-export const initDocsParenting = (app: Application) => {
+export const initDocsParenting = (app: Probot) => {
   app.on(["pull_request.opened", "pull_request.edited"], async (context) => {
     if (extractRepoFromContext(context) === REPO_DOCS) {
       await runDocsParentingDocs(context);
@@ -64,7 +64,7 @@ const runDocsParentingNonDocs = async (context: PRContext) => {
 
   await Promise.all([
     linksToDocs.map((link) =>
-      context.github.issues.addLabels({
+      context.octokit.issues.addLabels({
         ...link.issue(),
         labels: ["has-parent"],
       })
@@ -99,10 +99,11 @@ const runDocsParentingDocs = async (context: PRContext) => {
     `Adding has-parent label to docs#${triggerIssue.number}`
   );
 
-  await context.github.issues.addLabels({
-    ...context.issue(),
-    labels: ["has-parent"],
-  });
+  await context.octokit.issues.addLabels(
+    context.issue({
+      labels: ["has-parent"],
+    })
+  );
 };
 
 /**
@@ -135,7 +136,7 @@ const updateDocsParentStatus = async (context: PRContext) => {
 
   if (parentState === "open") {
     // Parent is open, docs issue should be open too.
-    const docsPR = await docLink.fetchPR(context.github);
+    const docsPR = await docLink.fetchPR(context.octokit);
     const docsPRState = getPRState(docsPR);
 
     if (docsPRState === "open") {
@@ -152,7 +153,7 @@ const updateDocsParentStatus = async (context: PRContext) => {
 
     // docs PR state == closed
     log(`Parent got opened, opening docs PR ${docLink.number}.`);
-    await context.github.pulls.update({
+    await context.octokit.pulls.update({
       ...docLink.pull(),
       state: "open",
     });
@@ -161,7 +162,7 @@ const updateDocsParentStatus = async (context: PRContext) => {
 
   if (parentState === "closed") {
     log(`Parent got closed, closing docs PR ${docLink.number}`);
-    await context.github.pulls.update({
+    await context.octokit.pulls.update({
       ...docLink.pull(),
       state: "closed",
     });
@@ -171,7 +172,7 @@ const updateDocsParentStatus = async (context: PRContext) => {
   // Parent state == merged
   log(`Adding parent-merged label to doc PR ${docLink.number}`);
 
-  await context.github.issues.addLabels({
+  await context.octokit.issues.addLabels({
     ...docLink.issue(),
     labels: ["parent-merged"],
   });

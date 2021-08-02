@@ -1,12 +1,11 @@
 import { PRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import { REPO_CORE } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
-import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
 
 const NAME = "DocsMissing";
 
-export const initDocsMissing = (app: Application) => {
+export const initDocsMissing = (app: Probot) => {
   app.on(
     [
       "pull_request.labeled",
@@ -24,13 +23,13 @@ export const runDocsMissing = async (context: PRContext) => {
     `Running on PR ${context.payload.repository.name}#${pr.number}`
   );
 
-  const hasDocsMissingLabel = (pr.labels as WebhookPayloadIssuesIssue["labels"])
+  const hasDocsMissingLabel = pr.labels
     .map((label) => label.name)
     .includes("needs-docs");
 
   if (hasDocsMissingLabel) {
     context.log(NAME, "Adding missing docs status");
-    await context.github.repos.createStatus(
+    await context.octokit.repos.createCommitStatus(
       context.repo({
         sha: pr.head.sha,
         context: "needs-docs",
@@ -40,7 +39,7 @@ export const runDocsMissing = async (context: PRContext) => {
     );
   } else {
     const previousCheck = (
-      await context.github.repos.listStatusesForRef(
+      await context.octokit.repos.listCommitStatusesForRef(
         context.repo({ ref: pr.head.sha })
       )
     ).data
@@ -49,7 +48,7 @@ export const runDocsMissing = async (context: PRContext) => {
       .includes("needs-docs");
     if (previousCheck) {
       context.log(NAME, "Removing missing docs status");
-      await context.github.repos.createStatus(
+      await context.octokit.repos.createCommitStatus(
         context.repo({
           sha: pr.head.sha,
           context: "needs-docs",

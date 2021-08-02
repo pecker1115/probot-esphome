@@ -1,9 +1,12 @@
-import { PRContext } from "../types";
-import { GitHubAPI } from "probot/lib/github";
-import { Octokit } from "@octokit/rest";
+import {
+  PRContext,
+  Octokit,
+  PullsListFilesResponseItem,
+  PullsListFilesResponse,
+} from "../types";
 
 export const fetchPRWithCache = async (
-  github: GitHubAPI,
+  github: Octokit,
   owner: string,
   repo: string,
   number: number
@@ -19,8 +22,8 @@ export const fetchPRWithCache = async (
 
 export const fetchPullRequestFilesFromContext = (
   context: PRContext
-): Promise<Octokit.PullsListFilesResponse> => {
-  return context.github.pulls
+): Promise<PullsListFilesResponse> => {
+  return context.octokit.pulls
     .listFiles(context.issue())
     .then(({ data }) => data);
 };

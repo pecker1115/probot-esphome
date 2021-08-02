@@ -1,6 +1,5 @@
 import { ParsedPath } from "../../util/parse_path";
 import { fetchPullRequestFilesFromContext } from "../../util/pull_request";
-import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
 
 // Convert a list of file paths to labels to set
 
@@ -15,7 +14,7 @@ import needsTests from "./strategies/needsTests";
 import typeOfChange from "./strategies/typeOfChange";
 import markDashboard from "./strategies/markDashboard";
 import { PRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { filterEventNoBot } from "../../util/filter_event_no_bot";
 import { REPO_CORE } from "../../const";
@@ -35,7 +34,7 @@ const STRATEGIES = [
   markDashboard,
 ];
 
-export const initLabelBot = (app: Application) => {
+export const initLabelBot = (app: Probot) => {
   app.on(
     [
       "pull_request.opened",
@@ -53,9 +52,7 @@ export const runLabelBot = async (context: PRContext) => {
     `Running on PR ${context.payload.repository.name}#${pr.number}`
   );
 
-  const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
-    (label) => label.name
-  );
+  const currentLabels = pr.labels.map((label) => label.name);
   const currentLabelsStr = currentLabels
     .map((label) => `"${label}"`)
     .join(", ");
@@ -118,7 +115,7 @@ export const runLabelBot = async (context: PRContext) => {
     );
 
     promises.push(
-      context.github.issues.addLabels(
+      context.octokit.issues.addLabels(
         // Bug in Probot: https://github.com/probot/probot/issues/917
         // @ts-ignore
         context.issue({
@@ -140,7 +137,11 @@ export const runLabelBot = async (context: PRContext) => {
     );
     removeLabels.forEach((label) => {
       promises.push(
-        context.github.issues.removeLabel({ ...context.issue(), name: label })
+        context.octokit.issues.removeLabel(
+          context.issue({
+            name: label,
+          })
+        )
       );
     });
   }

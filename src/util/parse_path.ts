@@ -1,9 +1,9 @@
 import { entityComponents, coreComponents } from "../const";
-import { Octokit } from "@octokit/rest";
 import { basename } from "path";
+import { PullsListFilesResponseItem } from "../types";
 
 export class ParsedPath {
-  public file: Octokit.PullsListFilesResponseItem;
+  public file: PullsListFilesResponseItem;
   public type:
     | null
     | "core"
@@ -16,7 +16,7 @@ export class ParsedPath {
   public platform: null | string = null;
   public core = false;
 
-  constructor(file: Octokit.PullsListFilesResponseItem) {
+  constructor(file: PullsListFilesResponseItem) {
     this.file = file;
     const parts = file.filename.split("/");
     const rootFolder = parts.length > 1 ? parts.shift() : undefined;

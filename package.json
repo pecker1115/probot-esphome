@@ -13,32 +13,20 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@octokit/webhooks-types": "^4.2.2",
     "@types/debounce": "^1.2.0",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.6.8",
-    "husky": "^3.0.1",
-    "lint-staged": "^9.2.0",
     "mocha": "^6.2.0",
-    "prettier": "^1.18.2",
+    "prettier": "^2.3.2",
     "ts-mocha": "^6.0.0",
-    "typescript": "^3.5.3"
+    "typescript": "^4.3.5"
   },
   "dependencies": {
-    "codeowners-utils": "^1.0.0",
+    "codeowners-utils": "^1.0.2",
     "debounce": "^1.2.0",
-    "ignore": "^5.1.2",
-    "probot": "^9.2.19"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.ts": [
-      "prettier --write",
-      "git add"
-    ]
+    "ignore": "^5.1.8",
+    "probot": "^12.1.0"
   },
   "prettier": {
     "trailingComma": "es5",

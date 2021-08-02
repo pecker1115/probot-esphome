@@ -1,15 +1,15 @@
 const codeownersUtils = require("codeowners-utils");
-import { LabeledIssueOrPRContext } from "../../types";
-import { Application } from "probot";
+import { IssueOrPRContext, LabeledIssueOrPRContext } from "../../types";
+import { Probot } from "probot";
 import { REPO_ISSUES, REPO_CORE, ORG_ESPHOME } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { getIssueFromPayload } from "../../util/issue";
 import { scheduleComment } from "../../util/comment";
-import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
+import { Issue } from "@octokit/webhooks-types";
 
 const NAME = "CodeOwnersMention";
 
-export const initCodeOwnersMention = (app: Application) => {
+export const initCodeOwnersMention = (app: Probot) => {
   app.on(
     ["issues.labeled", "pull_request.labeled"],
     filterEventByRepo(NAME, [REPO_ISSUES, REPO_CORE], runCodeOwnersMention)
@@ -20,7 +20,7 @@ export const runCodeOwnersMention = async (
   context: LabeledIssueOrPRContext
 ) => {
   const labelName = context.payload.label.name;
-  const triggerIssue = getIssueFromPayload(context);
+  const triggerIssue = getIssueFromPayload(context as any);
   const triggerURL = triggerIssue.html_url;
   context.log(
     NAME,
@@ -36,7 +36,7 @@ export const runCodeOwnersMention = async (
     NAME,
     `Loading CODEOWNERS from ${ORG_ESPHOME}/${REPO_CORE}`
   );
-  const codeownersData = await context.github.repos.getContents({
+  const codeownersData = await context.octokit.repos.getContent({
     owner: ORG_ESPHOME,
     repo: REPO_CORE,
     path: "CODEOWNERS",
@@ -69,11 +69,11 @@ export const runCodeOwnersMention = async (
   }
 
   // The type for the PR payload is wrong for assignees. Cast it to issue. type is the same.
-  const assignees = (triggerIssue.assignees as WebhookPayloadIssuesIssue["assignees"]).map(
-    (assignee) => assignee.login.toLowerCase()
+  const assignees = triggerIssue.assignees.map((assignee) =>
+    assignee.login.toLowerCase()
   );
 
-  const commentersData = await context.github.issues.listComments(
+  const commentersData = await context.octokit.issues.listComments(
     context.issue({ per_page: 100 })
   );
   const commenters = commentersData.data.map((commenter) =>
@@ -84,7 +84,7 @@ export const runCodeOwnersMention = async (
   const ownersMinusAuthor = owners.filter((usr) => usr !== payloadUsername);
 
   const promises: Promise<unknown>[] = [
-    context.github.issues.addAssignees(
+    context.octokit.issues.addAssignees(
       context.issue({ assignees: ownersMinusAuthor })
     ),
   ];
@@ -111,7 +111,7 @@ export const runCodeOwnersMention = async (
   // Add a label if author of issue/PR is a code owner
   if (owners.includes(payloadUsername)) {
     promises.push(
-      context.github.issues.addLabels(
+      context.octokit.issues.addLabels(
         context.issue({ labels: ["by-code-owner"] })
       )
     );

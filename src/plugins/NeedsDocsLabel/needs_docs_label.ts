@@ -1,5 +1,5 @@
 import { PRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import { ORG_ESPHOME, REPO_CORE, REPO_DOCS } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { getIssueFromPayload } from "../../util/issue";
@@ -10,7 +10,7 @@ import {
 
 const NAME = "NeedsDocsLabel";
 
-export const initNeedsDocsLabel = (app: Application) => {
+export const initNeedsDocsLabel = (app: Probot) => {
   app.on(
     ["pull_request.labeled", "pull_request.unlabeled", "pull_request.edited"],
     filterEventByRepo(NAME, [REPO_CORE], runNeedsDocsLabel)
@@ -41,11 +41,11 @@ export const runNeedsDocsLabel = async (context: PRContext) => {
     .some((link) => link.owner === ORG_ESPHOME && link.repo === REPO_DOCS);
 
   if (hasDocs && labels.includes("needs-docs")) {
-    await context.github.issues.removeLabel(
+    await context.octokit.issues.removeLabel(
       context.issue({ name: "needs-docs" })
     );
   } else if (!hasDocs) {
-    await context.github.issues.addLabels(
+    await context.octokit.issues.addLabels(
       context.issue({ labels: ["needs-docs"] })
     );
   }

@@ -1,6 +1,6 @@
-import { GitHubAPI } from "probot/lib/github";
 import { fetchIssueWithCache } from "./issue";
 import { fetchPRWithCache } from "./pull_request";
+import { Octokit } from "../types";
 
 interface PullOrBodyTask {
   checked: boolean;
@@ -34,7 +34,7 @@ export class ParsedGitHubIssueOrPR {
     };
   }
 
-  async fetchIssue(github: GitHubAPI) {
+  async fetchIssue(github: Octokit) {
     return await fetchIssueWithCache(
       github,
       this.owner,
@@ -43,7 +43,7 @@ export class ParsedGitHubIssueOrPR {
     );
   }
 
-  async fetchPR(github: GitHubAPI) {
+  async fetchPR(github: Octokit) {
     return await fetchPRWithCache(github, this.owner, this.repo, this.number);
   }
 }

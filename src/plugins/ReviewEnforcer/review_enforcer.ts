@@ -1,11 +1,10 @@
 import { PRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import {
   filterEventByRepo,
   extractRepoFromContext,
 } from "../../util/filter_event_repo";
 import { REPO_CORE, REPO_DOCS } from "../../const";
-import { filterEventNoBot } from "../../util/filter_event_no_bot";
 import { fetchPullRequestFilesFromContext } from "../../util/pull_request";
 import { ParsedPath } from "../../util/parse_path";
 import { ParsedDocsPath } from "../../util/parse_docs_path";
@@ -19,11 +18,14 @@ const INTEGRATIONS = ["xiaomi_miio"];
 
 const commentBody = `This pull request needs to be manually signed off by @home-assistant/core before it can get merged.`;
 
-export const initReviewEnforcer = (app: Application) => {
-  app.on("pull_request.opened", filterEventNoBot(NAME, runReviewEnforcer));
+export const initReviewEnforcer = (app: Probot) => {
+  app.on("pull_request.opened", runReviewEnforcer as any);
 };
 
 const runReviewEnforcer = async (context: PRContext) => {
+  if (context.isBot) {
+    return;
+  }
   if (USERS.includes(context.payload.sender.login)) {
     await markForReview(context);
     return;

@@ -4,7 +4,7 @@
  * We debounce it so that we only leave 1 comment with all notices.
  */
 import { debounce } from "debounce";
-import { PRContext, IssueContext } from "../types";
+import { PRContext, IssueContext, IssueOrPRContext } from "../types";
 
 type PatchedContext = (PRContext | IssueContext) & {
   _commentsToPost?: Array<{ handler: string; message: string }>;
@@ -31,13 +31,13 @@ const postComment = (context: PRContext | IssueContext) => {
 
   let commentBody = toPost.join("\n\n---\n\n");
 
-  context.github.issues.createComment(context.issue({ body: commentBody }));
+  context.octokit.issues.createComment(context.issue({ body: commentBody }));
 };
 
 const debouncedPostComment = debounce(postComment, WAIT_COMMENTS);
 
 export const scheduleComment = (
-  context: PRContext | IssueContext,
+  context: any,
   handler: string,
   message: string
 ) => {
@@ -45,6 +45,7 @@ export const scheduleComment = (
   if (!("_commentsToPost" in patchedContext)) {
     patchedContext._commentsToPost = [];
   }
+  context.payload.repository;
   patchedContext._commentsToPost.push({ handler, message });
   debouncedPostComment(context);
 };

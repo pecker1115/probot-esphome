@@ -1,6 +1,6 @@
 import { fetchPullRequestFilesFromContext } from "../../util/pull_request";
 import { PRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { REPO_CORE } from "../../const";
 import { filterEventNoBot } from "../../util/filter_event_no_bot";
@@ -17,7 +17,7 @@ const DEPENDENCY_FILES = [
   "requirements_test_all.txt",
 ];
 
-export const initDependencyBump = (app: Application) => {
+export const initDependencyBump = (app: Probot) => {
   app.on(
     ["pull_request.opened"],
     filterEventNoBot(
@@ -38,7 +38,7 @@ const runDependencyBump = async (context: PRContext) => {
     return;
   }
 
-  await context.github.issues.addLabels(
+  await context.octokit.issues.addLabels(
     context.issue({ labels: ["dependency-bump"] })
   );
 };

@@ -1,9 +1,8 @@
 import { PRContext } from "../../types";
-import { Application } from "probot";
+import { Probot } from "probot";
 import { REPO_CORE, REPO_DOCS } from "../../const";
 import { extractRepoFromContext } from "../../util/filter_event_repo";
 import { getIssueFromPayload } from "../../util/issue";
-import { WebhookPayloadIssuesIssue } from "@octokit/webhooks";
 
 const NAME = "LabelCleaner";
 
@@ -19,8 +18,8 @@ const TO_CLEAN: { [key: string]: string[] } = {
   ],
 };
 
-export const initLabelCleaner = (app: Application) => {
-  app.on(["pull_request.closed"], runLabelCleaner);
+export const initLabelCleaner = (app: Probot) => {
+  app.on(["pull_request.closed"], runLabelCleaner as any);
 };
 
 export const runLabelCleaner = async (context: PRContext) => {
@@ -35,10 +34,7 @@ export const runLabelCleaner = async (context: PRContext) => {
     `Running on ${context.payload.repository.name}#${pr.number}`
   );
 
-  // Typing is wrong for PRs, so use labels type from issues
-  const currentLabels = (pr.labels as WebhookPayloadIssuesIssue["labels"]).map(
-    (label) => label.name
-  );
+  const currentLabels = pr.labels.map((label) => label.name);
   context.log(NAME, `Current Labels: ${currentLabels}`);
 
   const labelsToRemove = TO_CLEAN[repo]
@@ -50,7 +46,11 @@ export const runLabelCleaner = async (context: PRContext) => {
     context.log(NAME, `Cleaning up labels: ${labelsToRemove.join(", ")}`);
     await Promise.all(
       labelsToRemove.map((label) =>
-        context.github.issues.removeLabel({ ...context.issue(), name: label })
+        context.octokit.issues.removeLabel(
+          context.issue({
+            name: label,
+          })
+        )
       )
     );
   }

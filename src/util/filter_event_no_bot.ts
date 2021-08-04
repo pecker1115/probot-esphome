@@ -7,7 +7,7 @@ export const filterEventNoBot = (
   // Wrapped handler function
   return async (context: Context) => {
     if (context.isBot) {
-      context.log.debug(name, `Skipping event because it's a bot.`);
+      context.log.debug(`${name}: Skipping event because it's a bot.`);
       return;
     }
 

@@ -15,10 +15,10 @@ export const initIssueLinks = (app: Probot) => {
 };
 
 export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
+  const log = context.log.child({ name: NAME });
   const triggerIssue = getIssueFromPayload(context as any);
   const labelName = context.payload.label.name;
-  context.log(
-    NAME,
+  log.debug(
     `Running for issue ${context.payload.repository.name}#${triggerIssue.number} and label "${labelName}"`
   );
 
@@ -39,6 +39,6 @@ export const runIssueLinks = async (context: LabeledIssueOrPRContext) => {
     `[${integrationName} recent changes](${prsLink})`,
   ].join("\n");
 
-  context.log(NAME, `Adding comment with links ${commentBody}`);
+  log.info(`Adding comment with links ${commentBody}`);
   scheduleComment(context, NAME, commentBody);
 };

@@ -19,23 +19,20 @@ export const initCodeOwnersMention = (app: Probot) => {
 export const runCodeOwnersMention = async (
   context: LabeledIssueOrPRContext
 ) => {
+  const log = context.log.child({ name: NAME });
   const labelName = context.payload.label.name;
   const triggerIssue = getIssueFromPayload(context as any);
   const triggerURL = triggerIssue.html_url;
-  context.log(
-    NAME,
+  log.debug(
     `Running for issue ${context.payload.repository.name}#${triggerIssue.number} and label "${labelName}"`
   );
 
   if (labelName.indexOf("integration: ") === -1) {
-    context.log(NAME, ` -> Not an integration label.`);
+    log.debug(` -> Not an integration label.`);
     return;
   }
 
-  context.log.debug(
-    NAME,
-    `Loading CODEOWNERS from ${ORG_ESPHOME}/${REPO_CORE}`
-  );
+  log.debug(`Loading CODEOWNERS from ${ORG_ESPHOME}/${REPO_CORE}`);
   const codeownersData = await context.octokit.repos.getContent({
     owner: ORG_ESPHOME,
     repo: REPO_CORE,
@@ -43,7 +40,7 @@ export const runCodeOwnersMention = async (
   });
 
   const integrationName = labelName.split("integration: ")[1];
-  context.log.debug(NAME, `Integration name: ${integrationName}`);
+  log.debug(`Integration name: ${integrationName}`);
   const path = `esphome/components/${integrationName}/*`;
   let str = "";
   if ("content" in codeownersData.data) {
@@ -51,10 +48,10 @@ export const runCodeOwnersMention = async (
   }
   const entries = parse(str);
   const match = codeownersUtils.matchFile(path, entries);
-  context.log.debug(NAME, "Matches: ", match);
+  log.debug(match, `Found Matches`);
 
   if (!match) {
-    context.log(NAME, `No match found in CODEOWNERS for ${path}`);
+    log.debug(`No match found in CODEOWNERS for ${path}`);
     return;
   }
 
@@ -100,10 +97,7 @@ export const runCodeOwnersMention = async (
       ", "
     )}, mind taking a look at this ${triggerLabel} as its been labeled with an integration (\`${integrationName}\`) you are listed as a [codeowner](${codeownersLine}) for? Thanks!`;
 
-    context.log(
-      NAME,
-      `Adding comment to ${triggerLabel} ${triggerURL}: ${commentBody}`
-    );
+    log.info(`Adding comment to ${triggerLabel} ${triggerURL}: ${commentBody}`);
 
     scheduleComment(context, NAME, commentBody);
   }

@@ -46,17 +46,15 @@ export const initLabelBot = (app: Probot) => {
 };
 
 export const runLabelBot = async (context: PRContext) => {
+  const log = context.log.child({ name: NAME });
   const pr = context.payload.pull_request;
-  context.log(
-    NAME,
-    `Running on PR ${context.payload.repository.name}#${pr.number}`
-  );
+  log.info(`Running on PR ${context.payload.repository.name}#${pr.number}`);
 
   const currentLabels = pr.labels.map((label) => label.name);
   const currentLabelsStr = currentLabels
     .map((label) => `"${label}"`)
     .join(", ");
-  context.log.debug(NAME, `current labels: ${currentLabelsStr}`);
+  log.debug(`current labels: ${currentLabelsStr}`);
 
   const managedLabels = currentLabels.filter(
     (label) =>
@@ -76,7 +74,7 @@ export const runLabelBot = async (context: PRContext) => {
   const managedLabelsStr = managedLabels
     .map((label) => `"${label}"`)
     .join(", ");
-  context.log.debug(NAME, `of those are managed: ${managedLabelsStr}`);
+  log.debug(`of those are managed: ${managedLabelsStr}`);
 
   const files = await fetchPullRequestFilesFromContext(context);
   const parsed = files.map((file) => new ParsedPath(file));
@@ -97,18 +95,16 @@ export const runLabelBot = async (context: PRContext) => {
   }
   const labels = Array.from(labelSet);
   const labelStr = labels.map((label) => `"${label}"`).join(", ");
-  context.log.debug(NAME, `computed labels: ${labelStr}`);
+  log.debug(`computed labels: ${labelStr}`);
 
   const promises: Promise<unknown>[] = [];
 
   if (labels.length > 15) {
-    context.log(
-      NAME,
+    log.debug(
       `Not setting ${labels.length} labels because out of range of what we allow`
     );
   } else if (labels.length > 0) {
-    context.log(
-      NAME,
+    log.info(
       `Setting labels on PR ${
         context.payload.pull_request.number
       }: ${labels.join(", ")}`
@@ -129,8 +125,7 @@ export const runLabelBot = async (context: PRContext) => {
     (label) => managedLabels.includes(label) && !labels.includes(label)
   );
   if (removeLabels.length > 0) {
-    context.log(
-      NAME,
+    log.info(
       `Removing labels on PR ${
         context.payload.pull_request.number
       }: ${removeLabels.join(", ")}`

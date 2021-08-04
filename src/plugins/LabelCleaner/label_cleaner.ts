@@ -23,19 +23,17 @@ export const initLabelCleaner = (app: Probot) => {
 };
 
 export const runLabelCleaner = async (context: PRContext) => {
+  const log = context.log.child({ name: NAME });
   const repo = extractRepoFromContext(context);
 
   if (!(repo in TO_CLEAN)) {
     return;
   }
   const pr = getIssueFromPayload(context);
-  context.log(
-    NAME,
-    `Running on ${context.payload.repository.name}#${pr.number}`
-  );
+  log.debug(`Running on ${context.payload.repository.name}#${pr.number}`);
 
   const currentLabels = pr.labels.map((label) => label.name);
-  context.log(NAME, `Current Labels: ${currentLabels}`);
+  log.debug(`Current Labels: ${currentLabels}`);
 
   const labelsToRemove = TO_CLEAN[repo]
     // Find all labels that the PR has
@@ -43,7 +41,7 @@ export const runLabelCleaner = async (context: PRContext) => {
 
   // If any label delete tasks created, await them.
   if (labelsToRemove.length) {
-    context.log(NAME, `Cleaning up labels: ${labelsToRemove.join(", ")}`);
+    log.info(`Cleaning up labels: ${labelsToRemove.join(", ")}`);
     await Promise.all(
       labelsToRemove.map((label) =>
         context.octokit.issues.removeLabel(

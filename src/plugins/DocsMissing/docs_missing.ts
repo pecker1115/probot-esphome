@@ -17,18 +17,16 @@ export const initDocsMissing = (app: Probot) => {
 };
 
 export const runDocsMissing = async (context: PRContext) => {
+  const log = context.log.child({ name: NAME });
   const pr = context.payload.pull_request;
-  context.log(
-    NAME,
-    `Running on PR ${context.payload.repository.name}#${pr.number}`
-  );
+  log.debug(`Running on PR ${context.payload.repository.name}#${pr.number}`);
 
   const hasDocsMissingLabel = pr.labels
     .map((label) => label.name)
     .includes("needs-docs");
 
   if (hasDocsMissingLabel) {
-    context.log(NAME, "Adding missing docs status");
+    log.info("Adding missing docs status");
     await context.octokit.repos.createCommitStatus(
       context.repo({
         sha: pr.head.sha,
@@ -47,7 +45,7 @@ export const runDocsMissing = async (context: PRContext) => {
       .map((it) => it.context)
       .includes("needs-docs");
     if (previousCheck) {
-      context.log(NAME, "Removing missing docs status");
+      log.info("Removing missing docs status");
       await context.octokit.repos.createCommitStatus(
         context.repo({
           sha: pr.head.sha,

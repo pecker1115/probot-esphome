@@ -31,12 +31,12 @@ const getLabelNames = (pr: PullRequest) => {
 };
 
 const runLabeled = async (context: LabeledOrUnlabeledPRContext) => {
+  const log = context.log.child({ name: `${NAME} labeled` });
   const pr = context.payload.pull_request;
   const label = context.payload.label.name;
 
   const action = context.payload.action;
-  context.log.debug(
-    NAME,
+  log.debug(
     `Running on PR ${context.payload.repository.name}#${pr.number} and label ${label}`
   );
 
@@ -56,7 +56,7 @@ const runLabeled = async (context: LabeledOrUnlabeledPRContext) => {
     commentBody += "```\n\n";
     commentBody += "And run `script/build_codeowners.py`\n";
 
-    context.log(NAME, `Adding comment to PR ${pr.html_url}: ${commentBody}`);
+    log.info(`Adding comment to PR ${pr.html_url}: ${commentBody}`);
 
     scheduleComment(context, NAME, commentBody);
   } else if (action === "labeled" && isNewIntegration) {
@@ -78,11 +78,9 @@ const runLabeled = async (context: LabeledOrUnlabeledPRContext) => {
 };
 
 const runSynchronize = async (context: Context<"pull_request.synchronize">) => {
+  const log = context.log.child({ name: `${NAME} synchronize` });
   const pr = context.payload.pull_request;
-  context.log.debug(
-    NAME,
-    `Running on PR ${context.payload.repository.name}#${pr.number}`
-  );
+  log.debug(`Running on PR ${context.payload.repository.name}#${pr.number}`);
 
   const hasCodeownersLabel = getLabelNames(pr).some(
     (name) => name === NEEDS_CODEOWNERS_LABEL

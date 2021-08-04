@@ -18,18 +18,16 @@ export const initNeedsDocsLabel = (app: Probot) => {
 };
 
 export const runNeedsDocsLabel = async (context: PRContext) => {
+  const log = context.log.child({ name: NAME });
   const pr = context.payload.pull_request;
-  context.log.debug(
-    NAME,
-    `Running on PR ${context.payload.repository.name}#${pr.number}`
-  );
+  log.debug(`Running on PR ${context.payload.repository.name}#${pr.number}`);
 
   const labelsThatNeedDocs = ["new-integration", "needs-docs"];
 
   const labels = pr.labels.map((label) => label.name);
   const needsDocs = labelsThatNeedDocs.some((label) => labels.includes(label));
   if (!needsDocs) {
-    context.log.debug(NAME, `Nothing to do, PR doesn't require docs`);
+    log.debug(`Nothing to do, PR doesn't require docs`);
     return;
   }
 

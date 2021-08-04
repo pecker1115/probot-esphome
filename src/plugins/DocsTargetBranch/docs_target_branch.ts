@@ -28,6 +28,7 @@ export const initDocsTargetBranch = (app: Probot) => {
 };
 
 export const runDocsTargetBranch = async (context: PRContext) => {
+  const log = context.log.child({ name: NAME });
   const target = context.payload.pull_request.base.ref;
   const links = extractIssuesOrPullRequestMarkdownLinks(
     context.payload.pull_request.body
@@ -37,7 +38,7 @@ export const runDocsTargetBranch = async (context: PRContext) => {
     )
   );
 
-  context.log(NAME, `Found ${links.length} links`);
+  log.debug(`Found ${links.length} links`);
 
   if (links.length === 0) {
     if (target !== "current") {
@@ -77,6 +78,7 @@ const wrongTargetBranchDetected = async (
   context: PRContext,
   correctTargetBranch: "current" | "next"
 ) => {
+  const log = context.log.child({ name: NAME });
   const labels = ["wrong-base-branch", "in-progress"];
   const promises: Promise<unknown>[] = [];
   const body: string =
@@ -92,7 +94,7 @@ const wrongTargetBranchDetected = async (
     return;
   }
 
-  context.log(NAME, `Adding ${labels} to PR`);
+  log.info(`Adding ${labels} to PR`);
   promises.push(
     context.octokit.issues.addLabels(
       // Bug in Probot: https://github.com/probot/probot/issues/917
@@ -103,10 +105,7 @@ const wrongTargetBranchDetected = async (
     )
   );
 
-  context.log(
-    NAME,
-    `Adding comment to ${context.payload.pull_request.number}: ${body}`
-  );
+  log.info(`Adding comment to ${context.payload.pull_request.number}: ${body}`);
 
   scheduleComment(context, "DocsTargetBranch", body);
 

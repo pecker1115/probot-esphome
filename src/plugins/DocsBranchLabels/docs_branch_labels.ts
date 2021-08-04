@@ -15,22 +15,20 @@ export const initDocsBranchLabels = (app: Probot) => {
 };
 
 export const runDocsBranchLabels = async (context: PRContext) => {
+  const log = context.log.child({ name: NAME });
   const pr = context.payload.pull_request;
-  context.log(
-    NAME,
-    `Running on ${context.payload.repository.name}#${pr.number}`
-  );
+  log.debug(`Running on ${context.payload.repository.name}#${pr.number}`);
 
   const targetBranch = pr.base.ref;
   const currentLabels = pr.labels.map((label) => label.name);
   const tasks: Promise<unknown>[] = [];
-  context.log(NAME, `Current labels: ${currentLabels}`);
+  log.debug(`Current labels: ${currentLabels}`);
 
   if (
     BRANCHES.includes(targetBranch) &&
     !currentLabels.includes(targetBranch)
   ) {
-    context.log(NAME, `Adding label ${targetBranch} to PR ${pr.number}`);
+    log.info(`Adding label ${targetBranch} to PR ${pr.number}`);
     tasks.push(
       context.octokit.issues.addLabels(
         context.issue({
@@ -44,7 +42,7 @@ export const runDocsBranchLabels = async (context: PRContext) => {
   const toRemove = currentLabels.filter(
     (label) => BRANCHES.includes(label) && label !== targetBranch
   );
-  context.log(NAME, `Removing labels: ${toRemove}`);
+  log.info(`Removing labels: ${toRemove}`);
   toRemove.forEach((label) =>
     tasks.push(
       context.octokit.issues.removeLabel(

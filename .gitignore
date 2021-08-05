@@ -20,3 +20,5 @@ lib
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+
+yarn-error.log

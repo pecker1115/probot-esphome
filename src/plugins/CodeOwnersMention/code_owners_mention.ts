@@ -70,6 +70,7 @@ export const runCodeOwnersMention = async (
     assignee.login.toLowerCase()
   );
 
+  log.debug(`Listing comments for issue ${triggerURL}`);
   const commentersData = await context.octokit.issues.listComments(
     context.issue({ per_page: 100 })
   );
@@ -80,11 +81,15 @@ export const runCodeOwnersMention = async (
   const payloadUsername = triggerIssue.user.login.toLowerCase();
   const ownersMinusAuthor = owners.filter((usr) => usr !== payloadUsername);
 
-  const promises: Promise<unknown>[] = [
-    context.octokit.issues.addAssignees(
-      context.issue({ assignees: ownersMinusAuthor })
-    ),
-  ];
+  const promises: Promise<unknown>[] = [];
+  if (ownersMinusAuthor.length) {
+    log.info(`Adding assignees ${ownersMinusAuthor.join(', ')}`);
+    promises.push(
+      context.octokit.issues.addAssignees(
+        context.issue({ assignees: ownersMinusAuthor })
+      )
+    );
+  }
 
   const mentions = ownersMinusAuthor
     .filter((usr) => !assignees.includes(usr) && !commenters.includes(usr))
@@ -104,6 +109,7 @@ export const runCodeOwnersMention = async (
 
   // Add a label if author of issue/PR is a code owner
   if (owners.includes(payloadUsername)) {
+    log.info(`Adding label by-code-owner`);
     promises.push(
       context.octokit.issues.addLabels(
         context.issue({ labels: ["by-code-owner"] })

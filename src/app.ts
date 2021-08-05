@@ -13,7 +13,7 @@ import { initHacktoberfest } from "./plugins/Hacktoberfest/hacktoberfest";
 import { initDependencyBump } from "./plugins/DependencyBump/dependency_bump";
 import { initNeedsCodeownersLabel } from "./plugins/NeedsCodeownersLabel/needs_codeowners_label";
 
-export = (app: Probot) => {
+export function initApp(app: Probot): void {
   initLabelBot(app);
   initNeedsDocsLabel(app);
   initCodeOwnersMention(app);
@@ -34,4 +34,4 @@ export = (app: Probot) => {
   // not needed
   // initDependencyBump(app);
   initNeedsCodeownersLabel(app);
-};
+}

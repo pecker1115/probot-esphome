@@ -37,10 +37,12 @@ export const runNeedsDocsLabel = async (context: PRContext) => {
     .some((link) => link.owner === ORG_ESPHOME && link.repo === REPO_DOCS);
 
   if (hasDocs && labels.includes("needs-docs")) {
+    log.info(`Removing label needs-docs`);
     await context.octokit.issues.removeLabel(
       context.issue({ name: "needs-docs" })
     );
   } else if (!hasDocs) {
+    log.info(`Adding label needs-docs`);
     await context.octokit.issues.addLabels(
       context.issue({ labels: ["needs-docs"] })
     );

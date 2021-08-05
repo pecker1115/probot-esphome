@@ -23,6 +23,7 @@ export const fetchPRWithCache = async (
 export const fetchPullRequestFilesFromContext = (
   context: PRContext
 ): Promise<PullsListFilesResponse> => {
+  context.log.debug(`Listing files from PR ${context.payload.number}`);
   return context.octokit.pulls
     .listFiles(context.pullRequest())
     .then(({ data }) => data);

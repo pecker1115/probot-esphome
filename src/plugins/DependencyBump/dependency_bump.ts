@@ -28,6 +28,7 @@ export const initDependencyBump = (app: Probot) => {
 };
 
 const runDependencyBump = async (context: PRContext) => {
+  const log = context.log.child({ name: NAME });
   const files = await fetchPullRequestFilesFromContext(context);
   const filenames = files.map((file) => {
     const parts = file.filename.split("/");
@@ -38,6 +39,7 @@ const runDependencyBump = async (context: PRContext) => {
     return;
   }
 
+  log.info("Adding label dependency-bump");
   await context.octokit.issues.addLabels(
     context.issue({ labels: ["dependency-bump"] })
   );

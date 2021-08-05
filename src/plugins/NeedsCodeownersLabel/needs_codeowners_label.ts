@@ -58,11 +58,12 @@ const runLabeled = async (context: LabeledOrUnlabeledPRContext) => {
 
     log.info(`Adding comment to PR ${pr.html_url}: ${commentBody}`);
 
-    scheduleComment(context, NAME, commentBody);
+    await scheduleComment(context as any, NAME, commentBody);
   } else if (action === "labeled" && isNewIntegration) {
     // When adding new-integration label check if we should add the needs-codeowners label
     const edited = await hasEditedCodeowners(context as any);
     if (!edited) {
+      log.info(`Adding label ${NEEDS_CODEOWNERS_LABEL}`);
       await context.octokit.issues.addLabels(
         context.issue({ labels: [NEEDS_CODEOWNERS_LABEL] })
       );
@@ -70,6 +71,7 @@ const runLabeled = async (context: LabeledOrUnlabeledPRContext) => {
   } else if (action === "unlabeled" && isNewIntegration) {
     // When removing new-integration label, remove needs-codeowners label
     if (getLabelNames(pr).some((name) => name === NEEDS_CODEOWNERS_LABEL)) {
+      log.info(`Removing label ${NEEDS_CODEOWNERS_LABEL}`);
       await context.octokit.issues.removeLabel(
         context.issue({ name: NEEDS_CODEOWNERS_LABEL })
       );
@@ -93,6 +95,7 @@ const runSynchronize = async (context: Context<"pull_request.synchronize">) => {
     return;
   }
 
+  log.info(`Removing label ${NEEDS_CODEOWNERS_LABEL}`);
   await context.octokit.issues.removeLabel(
     context.issue({ name: NEEDS_CODEOWNERS_LABEL })
   );

@@ -16,7 +16,7 @@ type PendingComment = {
 
 const pendingComments = new Map<string, PendingComment>();
 
-const postComment = async (key: string) => {
+async function postComment(key: string): Promise<void> {
   const pendingComment = pendingComments.get(key);
   pendingComments.delete(key);
 
@@ -34,6 +34,7 @@ const postComment = async (key: string) => {
 
   const commentBody = toPost.join("\n\n---\n\n");
 
+  context.log.info(`Posting comment on ${context.issue().issue_number}`);
   await context.octokit.issues.createComment(
     context.issue({ body: commentBody })
   );

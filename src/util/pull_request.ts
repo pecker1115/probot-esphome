@@ -24,7 +24,7 @@ export const fetchPullRequestFilesFromContext = (
   context: PRContext
 ): Promise<PullsListFilesResponse> => {
   return context.octokit.pulls
-    .listFiles(context.issue())
+    .listFiles(context.pullRequest())
     .then(({ data }) => data);
 };
 

@@ -43,6 +43,14 @@ export const initLabelBot = (app: Probot) => {
     ],
     filterEventNoBot(NAME, filterEventByRepo(NAME, [REPO_CORE], runLabelBot))
   );
+  app.on(
+    "pull_request.labeled",
+    filterEventByRepo(NAME, [REPO_CORE], async (context) => {
+      if (context.payload.label.name === "probot-recheck") {
+        await runLabelBot(context);
+      }
+    })
+  );
 };
 
 export const runLabelBot = async (context: PRContext) => {
@@ -69,6 +77,7 @@ export const runLabelBot = async (context: PRContext) => {
         "dashboard",
         "has-tests",
         "needs-tests",
+        "probot-recheck",
       ].includes(label)
   );
   const managedLabelsStr = managedLabels

@@ -28,7 +28,7 @@ export function initApp(app: Probot): void {
 
   initLabelCleaner(app);
   initDocsBranchLabels(app);
-  initDocsMissing(app);
+  // initDocsMissing(app);
 
   // initHacktoberfest(app);
   // not needed

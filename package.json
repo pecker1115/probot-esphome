@@ -18,7 +18,7 @@
     "@octokit/webhooks-types": "^4.2.2",
     "@types/debounce": "^1.2.0",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^12.6.8",
+    "@types/node": "^16.10.1",
     "mocha": "^6.2.0",
     "prettier": "^2.3.2",
     "serverless": "^2.60.0",

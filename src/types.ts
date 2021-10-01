@@ -7,6 +7,8 @@ export type PRContext = Context<"pull_request">;
 export type IssueContext = Context<"issues">;
 export type IssueOrPRContext = Context<"pull_request"> | Context<"issues">;
 export type LabeledPRContext = Context<"pull_request.labeled">;
+export type ReadyForReviewPRContext = Context<"pull_request.ready_for_review">;
+export type LabeledIssueContext = Context<"issues.labeled">;
 export type LabeledOrUnlabeledPRContext =
   | Context<"pull_request.labeled">
   | Context<"pull_request.unlabeled">;

@@ -1,26 +1,32 @@
 const codeownersUtils = require("codeowners-utils");
-import { IssueOrPRContext, LabeledIssueOrPRContext } from "../../types";
+import { IssueOrPRContext, LabeledIssueContext, LabeledIssueOrPRContext, LabeledPRContext, ReadyForReviewPRContext } from "../../types";
 import { Probot } from "probot";
 import { REPO_ISSUES, REPO_CORE, ORG_ESPHOME } from "../../const";
 import { filterEventByRepo } from "../../util/filter_event_repo";
 import { getIssueFromPayload } from "../../util/issue";
 import { scheduleComment } from "../../util/comment";
-import { Issue } from "@octokit/webhooks-types";
 
 const NAME = "CodeOwnersMention";
 
 export const initCodeOwnersMention = (app: Probot) => {
   app.on(
-    ["issues.labeled", "pull_request.labeled"],
-    filterEventByRepo(NAME, [REPO_ISSUES, REPO_CORE], runCodeOwnersMention)
+    ["pull_request.labeled"],
+    filterEventByRepo(NAME, [REPO_CORE], runCodeOwnersMentionCore)
+  );
+  app.on(
+    ["issues.labeled"],
+    filterEventByRepo(NAME, [REPO_ISSUES], runCodeOwnersMentionIssues)
+  );
+  app.on(
+    ["pull_request.ready_for_review"],
+    filterEventByRepo(NAME, [REPO_CORE], runCodeOwnersMentionReadyForReview)
   );
 };
 
 export const runCodeOwnersMention = async (
-  context: LabeledIssueOrPRContext
+  context: IssueOrPRContext, labelName: string
 ) => {
   const log = context.log.child({ name: NAME });
-  const labelName = context.payload.label.name;
   const triggerIssue = getIssueFromPayload(context as any);
   const triggerURL = triggerIssue.html_url;
   log.debug(
@@ -136,4 +142,33 @@ function parse(str: string) {
   });
 
   return entries.reverse();
+}
+
+export const runCodeOwnersMentionCore = async (
+  context: LabeledPRContext
+) => {
+  const log = context.log.child({ name: NAME });
+  if (context.payload.pull_request.draft) {
+    log.debug(` -> Not in ready to review state.`);
+    return;
+  }
+  await runCodeOwnersMention(context as any, context.payload.label.name);
+}
+
+export const runCodeOwnersMentionIssues = async (
+  context: LabeledIssueContext
+) => {
+  await runCodeOwnersMention(context as any, context.payload.label.name);
+}
+
+export const runCodeOwnersMentionReadyForReview = async (
+  context: ReadyForReviewPRContext
+) => {
+  const pr = await context.octokit.pulls.get(context.pullRequest());
+  const labels = pr.data.labels;
+  await Promise.all(
+    labels.map(async label => {
+      await runCodeOwnersMention(context as any, label.name);
+    })
+  );
 }

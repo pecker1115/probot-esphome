@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "codeowners-utils": "^1.0.2",
-    "ignore": "^5.2.0",
+    "ignore": "^5.1.8",
     "probot": "^12.1.1"
   },
   "prettier": {

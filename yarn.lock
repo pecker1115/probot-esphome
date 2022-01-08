@@ -336,10 +336,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/webhooks-types@npm:^4.2.2":
-  version: 4.2.2
-  resolution: "@octokit/webhooks-types@npm:4.2.2"
-  checksum: 6f13807666fbaf3f5afd3b81321d92fb19e35c80607134c27156eb9bd0bff565ba27d25a0d1e50d4367f72c1fdf6d3fc44fc0c669c95c01dba8b03fda0421173
+"@octokit/webhooks-types@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "@octokit/webhooks-types@npm:5.2.0"
+  checksum: d9a70012b3aeb071955bc4a474f4c7877a7c31da5972697a12aeb4de1993a90fa72b9b1bbb3ce4dcf55606a9677b0dcda27704643190e255ee2d6619f90ce46a
   languageName: node
   linkType: hard
 
@@ -1082,10 +1082,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.10.1":
-  version: 16.10.1
-  resolution: "@types/node@npm:16.10.1"
-  checksum: 84d7f082e9421fdf1f08dbe00b66848897b2675eacc94a4fa445c4d34cef57c901ecd3276d03ebe110607a848d3df0ab33816aeff51a234e036111dd8ef1422f
+"@types/node@npm:^17.0.8":
+  version: 17.0.8
+  resolution: "@types/node@npm:17.0.8"
+  checksum: f4cadeb9e602027520abc88c77142697e33cf6ac98bb02f8b595a398603cbd33df1f94d01c055c9f13cde0c8eaafc5e396ca72645458d42b4318b845bc7f1d0f
   languageName: node
   linkType: hard
 
@@ -6452,12 +6452,12 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "prettier@npm:2.4.1"
+"prettier@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "prettier@npm:2.5.1"
   bin:
     prettier: bin-prettier.js
-  checksum: cc6830588b401b0d742862fe9c46bc9118204fb307c3abe0e49e95b35ed23629573807ffdf9cdd65289c252a0bb51fc0171437f6626ee36378dea80f0ee80b91
+  checksum: 21b9408476ea1c544b0e45d51ceb94a84789ff92095abb710942d780c862d0daebdb29972d47f6b4d0f7ebbfb0ffbf56cc2cfa3e3e9d1cca54864af185b15b66
   languageName: node
   linkType: hard
 
@@ -6487,24 +6487,24 @@ fsevents@~2.3.2:
   version: 0.0.0-use.local
   resolution: "probot-esphome@workspace:."
   dependencies:
-    "@octokit/webhooks-types": ^4.2.2
+    "@octokit/webhooks-types": ^5.2.0
     "@types/debounce": ^1.2.0
     "@types/mocha": ^9.0.0
-    "@types/node": ^16.10.1
+    "@types/node": ^17.0.8
     codeowners-utils: ^1.0.2
     ignore: ^5.1.8
     mocha: ^6.2.0
-    prettier: ^2.4.1
-    probot: ^12.1.1
+    prettier: ^2.5.1
+    probot: ^12.1.4
     serverless: ^2.60.0
-    ts-mocha: ^6.0.0
+    ts-mocha: ^8.0.0
     typescript: ^4.3.5
   languageName: unknown
   linkType: soft
 
-"probot@npm:^12.1.1":
-  version: 12.1.1
-  resolution: "probot@npm:12.1.1"
+"probot@npm:^12.1.4":
+  version: 12.1.4
+  resolution: "probot@npm:12.1.4"
   dependencies:
     "@octokit/core": ^3.2.4
     "@octokit/plugin-enterprise-compatibility": ^1.2.8
@@ -6543,7 +6543,7 @@ fsevents@~2.3.2:
     uuid: ^8.3.2
   bin:
     probot: bin/probot.js
-  checksum: e88b7390e379783afe085bf1fc10f2c3658aad799c69e0cb2fd4b20de7ed3d14c2570824399d493a10f028869e6f2c936ff63b43e9600006b079ac180c14cb22
+  checksum: 86abed26751aff6f959adafe644c1951cc102edad9df6a89bf858d292297687675d0f4ac330f96b12f09c9e378c9e5c21cc3778c943d41f407c2ae46a647c38c
   languageName: node
   linkType: hard
 
@@ -8138,20 +8138,20 @@ resolve@^1.19.0:
   languageName: node
   linkType: hard
 
-"ts-mocha@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "ts-mocha@npm:6.0.0"
+"ts-mocha@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "ts-mocha@npm:8.0.0"
   dependencies:
     ts-node: 7.0.1
     tsconfig-paths: ^3.5.0
   peerDependencies:
-    mocha: ^3.X.X || ^4.X.X || ^5.X.X || ^6.X.X
+    mocha: ^3.X.X || ^4.X.X || ^5.X.X || ^6.X.X || ^7.X.X || ^8.X.X
   dependenciesMeta:
     tsconfig-paths:
       optional: true
   bin:
-    ts-mocha: ./bin/ts-mocha
-  checksum: 12906a9d3b510477db70bcb87816f2e787d82c5dd117f22a3cf48d8cb932198d2ce635f5374f18de334b059161330baee6cd220c98266b1298d9371b83ca5cc3
+    ts-mocha: bin/ts-mocha
+  checksum: 66062e82f9be469cdcf51b120ff83e4a69c664fafb3ee020708cb5d65e87ee6bd8c98703a1012f2fb583d540dcbe14e0be77a36ea69a6c08ba3c89345859d8d9
   languageName: node
   linkType: hard
 

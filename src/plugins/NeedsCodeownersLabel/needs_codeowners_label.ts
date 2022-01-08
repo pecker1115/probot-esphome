@@ -70,7 +70,7 @@ const runLabeled = async (context: LabeledOrUnlabeledPRContext) => {
     }
   } else if (action === "unlabeled" && isNewIntegration) {
     // When removing new-integration label, remove needs-codeowners label
-    if (getLabelNames(pr).some((name) => name === NEEDS_CODEOWNERS_LABEL)) {
+    if (getLabelNames(pr as any).some((name) => name === NEEDS_CODEOWNERS_LABEL)) {
       log.info(`Removing label ${NEEDS_CODEOWNERS_LABEL}`);
       await context.octokit.issues.removeLabel(
         context.issue({ name: NEEDS_CODEOWNERS_LABEL })
@@ -84,7 +84,7 @@ const runSynchronize = async (context: Context<"pull_request.synchronize">) => {
   const pr = context.payload.pull_request;
   log.debug(`Running on PR ${context.payload.repository.name}#${pr.number}`);
 
-  const hasCodeownersLabel = getLabelNames(pr).some(
+  const hasCodeownersLabel = getLabelNames(pr as any).some(
     (name) => name === NEEDS_CODEOWNERS_LABEL
   );
   if (!hasCodeownersLabel) {
